@@ -1,6 +1,6 @@
-# VPN Gateway
+[Русский](README.md) | [English](README.en.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
 
-[English](README.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
+# VPN Gateway
 
 VPN Gateway 是一个自托管的 Linux 局域网 VPN 网关。它通过 `dnsmasq`、`ipset` 和策略路由，让指定域名经过 VPN，其余流量继续使用普通互联网出口，并提供 HTTPS 管理界面和 API。
 
@@ -48,8 +48,8 @@ XRay 到服务提供商的连接使用独立 bypass mark，并绑定物理网卡
 - 内核支持 `iptables`、`ipset` 和 `dnsmasq`。
 - 使用 AmneziaWG 时需要对应内核模块。在容器环境中，应在宿主机安装并加载该模块。
 - 至少一个 AmneziaWG 或 XRay 配置。
-- 编译 Outline Shadowsocks helper 时需要 Go 1.24 或更高版本。
-- 编译可选移动客户端时需要 Flutter 3.32 或更高版本。
+- 编译 Outline Shadowsocks helper 时需要 Go 1.25 或更高版本。
+- 编译可选移动客户端时需要 Flutter 3.41.9 或更高版本。
 
 安装程序会修改 DNS、IP 转发、systemd 服务和路由。对现有远程服务器安装前，应确保拥有控制台访问和可执行的回滚方案。
 
@@ -152,6 +152,7 @@ sudo systemctl restart dnsmasq
 python3 -m compileall -q api scripts
 bash -n install.sh scripts/*.sh
 go test ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 go build ./cmd/vpngw-outline-ss-local
 ```
 
@@ -185,3 +186,7 @@ curl -k https://127.0.0.1/api/v1/health
 - 使用 `API_ALLOWED_SUBNETS` 和主机防火墙限制管理 API。
 - 配置目录使用 `700` 权限，秘密文件使用 `600` 权限。
 - 启用全部走 VPN 模式前检查生成的路由和防火墙规则。
+
+## 许可证
+
+VPN Gateway 使用 [MIT 许可证](LICENSE)发布。

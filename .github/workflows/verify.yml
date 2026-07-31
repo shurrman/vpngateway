@@ -21,6 +21,8 @@ jobs:
         run: bash -n install.sh scripts/*.sh
       - name: Go tests
         run: go test ./...
+      - name: Go vulnerability scan
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
       - name: Public tree policy
         run: |
           test ! -e MEMORY.md
@@ -29,7 +31,8 @@ jobs:
           test ! -e CHANGELOG.md
           test ! -e PLAN.md
           test ! -e QUICKSTART.md
-          test "$(find . -type f -name '*.md' | wc -l)" -eq 3
+          test "$(find . -type f -name '*.md' | wc -l)" -eq 4
+          test -f LICENSE
           ! git grep -n -E 'BEGIN (OPENSSH|RSA|EC|PRIVATE) PRIVATE KEY'
 
   mobile:

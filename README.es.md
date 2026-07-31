@@ -1,6 +1,6 @@
-# VPN Gateway
+[Русский](README.md) | [English](README.en.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
 
-[English](README.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
+# VPN Gateway
 
 VPN Gateway es una puerta de enlace Linux autohospedada para enrutar de forma selectiva el tráfico de una red local por VPN. Integra `dnsmasq`, `ipset`, reglas de encaminamiento, una API HTTPS y una consola web.
 
@@ -48,8 +48,8 @@ Los sockets que conectan XRay con el proveedor usan una marca de bypass y la int
 - Compatibilidad con `iptables`, `ipset` y `dnsmasq`.
 - Módulo AmneziaWG en el kernel si se usa ese backend. En un contenedor, el módulo debe instalarse y cargarse en el host.
 - Al menos una configuración AmneziaWG o XRay.
-- Go 1.24 o posterior para compilar el helper Shadowsocks de Outline.
-- Flutter 3.32 o posterior para compilar el cliente móvil opcional.
+- Go 1.25 o posterior para compilar el helper Shadowsocks de Outline.
+- Flutter 3.41.9 o posterior para compilar el cliente móvil opcional.
 
 El instalador modifica DNS, forwarding, unidades systemd y rutas. Utilice acceso por consola y prepare una copia de seguridad antes de ejecutarlo sobre una máquina existente.
 
@@ -152,6 +152,7 @@ DNS-over-HTTPS en los clientes evita el DNS de la puerta de enlace e impide que 
 python3 -m compileall -q api scripts
 bash -n install.sh scripts/*.sh
 go test ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 go build ./cmd/vpngw-outline-ss-local
 ```
 
@@ -185,3 +186,7 @@ No reinicie ni cambie un túnel activo durante una prueba si no puede aceptar un
 - Limite la API con `API_ALLOWED_SUBNETS` y un firewall.
 - Use modo `700` para directorios de configuración y `600` para secretos.
 - Revise las rutas y reglas de firewall antes de activar el modo todo por VPN.
+
+## Licencia
+
+VPN Gateway se distribuye bajo la [Licencia MIT](LICENSE).

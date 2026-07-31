@@ -1,62 +1,62 @@
+[Русский](README.md) | [English](README.en.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
+
 # VPN Gateway
 
-[English](README.md) | [Español](README.es.md) | [简体中文](README.zh-CN.md)
+VPN Gateway - самостоятельно разворачиваемый Linux-шлюз для выборочной маршрутизации трафика локальной сети через VPN. Он объединяет DNS-based split tunneling, policy routing, веб-консоль администратора и два взаимозаменяемых внешних VPN-backend:
 
-VPN Gateway is a self-hosted Linux gateway for selective VPN routing on a local network. It combines DNS-based split tunneling, policy routing, a web administration console, and two interchangeable external VPN backends:
+- AmneziaWG через интерфейс `amn0`.
+- XRay VLESS или Shadowsocks через TUN-интерфейс `xray0`.
 
-- AmneziaWG through an `amn0` interface.
-- XRay VLESS or Shadowsocks through an `xray0` TUN interface.
+Дополнительный OpenVPN side-tunnel может использоваться для маршрутов в удалённые приватные сети, не становясь default route. Одновременно активен только один внешний интернет-туннель; при смене backend обновляется policy routing, а OpenVPN остаётся независимым.
 
-An optional OpenVPN side tunnel can carry routes to private remote networks without becoming the default route. Only one external internet tunnel is active at a time; switching the backend updates policy routing while the OpenVPN side tunnel remains independent.
+## Возможности
 
-## Features
+- Режимы split, весь трафик через VPN и весь трафик напрямую.
+- Категории доменов, адреса которых `dnsmasq` добавляет в общий `ipset`.
+- Взаимоисключаемые внешние туннели AmneziaWG и XRay.
+- VLESS, стандартный Shadowsocks, Outline Shadowsocks и XRay-подписки.
+- Независимые ping и download-тесты, не переключающие активный туннель.
+- Опциональный OpenVPN side-tunnel для приватных маршрутов, отправленных сервером.
+- HTTPS API на FastAPI и браузерная консоль управления.
+- Опциональный мобильный клиент на Flutter.
+- systemd-сервисы и таймеры для маршрутизации, health-check, обновления IP-списков и статистики.
+- Опциональный публичный XRay VLESS+XHTTP inbound за nginx.
 
-- Split, all-VPN, and all-direct routing modes.
-- Domain categories populated into a shared `ipset` by `dnsmasq`.
-- Mutually exclusive AmneziaWG and XRay external tunnels.
-- VLESS, standard Shadowsocks, Outline-prefixed Shadowsocks, and XRay subscriptions.
-- Independent ping and download tests that do not switch the active tunnel.
-- Optional OpenVPN side tunnel for server-pushed private routes.
-- FastAPI HTTPS API and a browser administration console.
-- Optional Flutter administration client.
-- systemd services and timers for routing, health checks, IP-list updates, and statistics.
-- Optional public XRay VLESS+XHTTP inbound behind nginx.
-
-## Architecture
+## Архитектура
 
 ```text
-LAN clients
+Клиенты LAN
     |
-    +-- DNS --> dnsmasq --> domain IPs added to vpn_domains ipset
+    +-- DNS --> dnsmasq --> IP доменов добавляются в ipset vpn_domains
     |
-    +-- normal traffic ---------------------------> ISP router
+    +-- обычный трафик --------------------------> роутер провайдера
     |
-    +-- destinations in vpn_domains --> fwmark --> route table 100
-                                                  |
-                                                  +-- amn0 (AmneziaWG), or
-                                                  +-- xray0 (XRay TUN)
+    +-- назначения из vpn_domains --> fwmark --> таблица маршрутов 100
+                                                   |
+                                                   +-- amn0 (AmneziaWG), или
+                                                   +-- xray0 (XRay TUN)
 
-Optional remote private networks <-------------- tun0 (OpenVPN)
+Удалённые приватные сети <----------------------- tun0 (OpenVPN)
 ```
 
-XRay provider sockets use a separate bypass mark and the physical LAN interface. This prevents the provider connection from being routed back into `xray0`.
+Сокеты, которыми XRay подключается к провайдеру, получают отдельную bypass-mark и привязываются к физическому LAN-интерфейсу. Это не позволяет соединению с провайдером зациклиться через `xray0`.
 
-## Requirements
+## Требования
 
-- A dedicated Debian 12 or Ubuntu 24.04 machine, VM, or container.
-- Root access and systemd.
-- A static LAN address for the gateway.
-- `iptables`, `ipset`, and `dnsmasq` support.
-- An AmneziaWG kernel module when using the Amnezia backend. In an unprivileged container, the module must be installed and loaded on the host.
-- At least one AmneziaWG config or one XRay VLESS/Shadowsocks config.
-- Go 1.24 or newer only when building the Outline Shadowsocks helper locally.
-- Flutter 3.32 or newer only when building the optional mobile client.
+- Отдельная машина, VM или контейнер с Debian 12 либо Ubuntu 24.04.
+- Root-доступ и systemd.
+- Статический LAN-адрес шлюза.
+- Поддержка `iptables`, `ipset` и `dnsmasq`.
+- Модуль AmneziaWG в ядре при использовании Amnezia backend. В непривилегированном контейнере модуль должен быть установлен и загружен на хосте.
+- Хотя бы один конфиг AmneziaWG либо XRay VLESS/Shadowsocks.
+- Go 1.25 или новее только для локальной сборки Outline Shadowsocks helper.
+- Flutter 3.41.9 или новее только для сборки опционального мобильного клиента.
 
-Do not install this on a remote production gateway without console access and a rollback plan. The installer changes DNS, forwarding, systemd units, and routing services.
+Не устанавливайте проект на удалённый production-шлюз без консольного доступа и проверенного плана отката. Установщик меняет DNS, forwarding, systemd units и сервисы маршрутизации.
 
-## Installation
+## Установка
 
-Clone the repository and create a local configuration:
+Клонируйте репозиторий и создайте локальную конфигурацию:
 
 ```bash
 git clone https://github.com/shurrman/vpngateway.git
@@ -65,7 +65,7 @@ cp config/vpngateway.conf.example config/vpngateway.conf
 sudoedit config/vpngateway.conf
 ```
 
-At minimum, set the gateway address, LAN subnet, LAN router, and physical interface:
+Как минимум задайте адрес шлюза, LAN-подсеть, LAN-роутер и физический интерфейс:
 
 ```bash
 GATEWAY_IP=192.168.50.2
@@ -77,42 +77,42 @@ DNS_UPSTREAM="8.8.8.8 8.8.4.4"
 API_ALLOWED_SUBNETS="192.168.50.0/24,127.0.0.0/8"
 ```
 
-Review the complete file before installation. Then run:
+Перед установкой проверьте весь файл, затем выполните:
 
 ```bash
 sudo ./install.sh
 ```
 
-The installer:
+Установщик:
 
-1. Installs required Debian packages.
-2. Creates `/opt/vpngateway`.
-3. Installs XRay and optionally builds the Outline Shadowsocks helper.
-4. Generates a local CA and an HTTPS server certificate.
-5. Generates `dnsmasq` configuration from `config/vpngateway.conf`.
-6. Installs and enables the systemd services.
-7. Starts the API and administration console.
+1. Устанавливает необходимые Debian-пакеты.
+2. Создаёт `/opt/vpngateway`.
+3. Устанавливает XRay и при необходимости собирает Outline Shadowsocks helper.
+4. Генерирует локальный CA и HTTPS-сертификат сервера.
+5. Создаёт конфигурацию `dnsmasq` из `config/vpngateway.conf`.
+6. Устанавливает и включает systemd-сервисы.
+7. Запускает API и консоль администратора.
 
-After installation, open:
+После установки откройте:
 
 ```text
 https://gateway.lan/
 ```
 
-Install the generated CA certificate from `https://gateway.lan/static/ca.crt` on administration devices, or terminate HTTPS with a certificate already trusted by those devices.
+Установите сгенерированный CA из `https://gateway.lan/static/ca.crt` на устройства администратора либо используйте для HTTPS сертификат, которому эти устройства уже доверяют.
 
-## Router Configuration
+## Настройка роутера
 
-For devices that should use VPN Gateway automatically, configure DHCP on the LAN router with:
+Для устройств, которые должны автоматически использовать VPN Gateway, задайте в DHCP на LAN-роутере:
 
-- Default gateway: the VPN Gateway address, for example `192.168.50.2`.
-- DNS server: the same VPN Gateway address.
+- Default gateway: адрес VPN Gateway, например `192.168.50.2`.
+- DNS server: тот же адрес VPN Gateway.
 
-Keep administrative access to the original router while testing. Verify direct routing, VPN-domain routing, and DNS before changing every client.
+Во время проверки сохраняйте административный доступ к исходному роутеру. Проверьте прямую маршрутизацию, маршрутизацию VPN-доменов и DNS до перевода всех клиентов.
 
-## AmneziaWG Configuration
+## Конфигурация AmneziaWG
 
-AmneziaWG configurations are runtime secrets and are never stored in Git. Upload an INI-style `.conf` file from the web console, or install one manually:
+Конфиги AmneziaWG являются runtime-секретами и никогда не хранятся в Git. Загрузите INI-файл `.conf` через веб-консоль либо установите его вручную:
 
 ```bash
 sudo install -d -m 700 /opt/vpngateway/config/configs
@@ -120,30 +120,30 @@ sudo install -m 600 my-provider.conf /opt/vpngateway/config/configs/provider.con
 echo provider | sudo tee /opt/vpngateway/config/configs/.active
 ```
 
-Provider files can be adapted before installation:
+Перед установкой провайдерский файл можно адаптировать:
 
 ```bash
 python3 scripts/vpngw-adapt-amneziawg.py my-provider.conf provider.conf
 ```
 
-The adapted config uses `Table = off`; VPN Gateway owns policy routing and adds the required route hooks.
+Адаптированный конфиг использует `Table = off`; policy routing и необходимые route hooks создаёт VPN Gateway.
 
-## XRay Client Configuration
+## Конфигурация XRay Client
 
-The XRay external backend accepts:
+Внешний XRay backend принимает:
 
-- `vless://` share links.
-- `ss://` Shadowsocks links.
-- XRay JSON outbound configurations.
-- Provider subscription URLs containing supported VLESS or Shadowsocks nodes.
+- Share-ссылки `vless://`.
+- Shadowsocks-ссылки `ss://`.
+- XRay JSON outbound-конфигурации.
+- URL подписок провайдера, содержащих поддерживаемые VLESS или Shadowsocks nodes.
 
-Use the `+` control in the XRay panel to upload a standalone config or add a subscription. Subscription refresh replaces generated nodes for that subscription and removes nodes no longer returned by the provider. Standalone configs are not affected.
+Используйте кнопку `+` в панели XRay, чтобы загрузить standalone-конфиг или добавить подписку. Обновление подписки заменяет созданные из неё nodes и удаляет отсутствующие в новом ответе провайдера. Standalone-конфиги при этом не изменяются.
 
-Ping and hard-download tests use independent temporary test paths. They do not activate the tested config or change the selected external tunnel.
+Ping и hard download tests используют независимые временные пути. Они не активируют проверяемый конфиг и не меняют выбранный внешний туннель.
 
 ## OpenVPN Side Tunnel
 
-OpenVPN profiles are runtime secrets under `/opt/vpngateway/config/openvpn`. The wrapper rejects pushed default routes and DNS changes. It accepts only private routes advertised by the server.
+OpenVPN-профили являются runtime-секретами и хранятся в `/opt/vpngateway/config/openvpn`. Wrapper запрещает полученные от сервера default routes и изменения DNS, принимая только маршруты к приватным сетям.
 
 ```bash
 sudo install -d -m 700 /opt/vpngateway/config/openvpn
@@ -152,13 +152,13 @@ echo remote | sudo tee /opt/vpngateway/config/openvpn/.active
 sudo systemctl enable --now vpngw-openvpn
 ```
 
-Confirm that the server advertises only the intended private networks.
+Убедитесь, что сервер рекламирует только необходимые приватные сети.
 
-## Domain Routing
+## Маршрутизация доменов
 
-Domain categories live in `config/domains/*.lst`. Each non-comment line is a domain suffix. `dnsmasq` resolves matching names and adds their addresses to the shared `vpn_domains` ipset.
+Категории доменов находятся в `config/domains/*.lst`. Каждая строка без комментария задаёт доменный суффикс. `dnsmasq` разрешает соответствующие имена и добавляет полученные адреса в общий ipset `vpn_domains`.
 
-After changing categories on an installed gateway:
+После изменения категорий на установленном шлюзе:
 
 ```bash
 sudo /opt/vpngateway/scripts/vpngw-update-domains.sh
@@ -166,46 +166,47 @@ sudo dnsmasq --test
 sudo systemctl restart dnsmasq
 ```
 
-The web console also supports category editing and raw-file editing. DNS-over-HTTPS on client devices bypasses gateway DNS and therefore prevents DNS-based ipset population.
+Веб-консоль также поддерживает редактирование категорий и raw-файлов. DNS-over-HTTPS на клиентских устройствах обходит DNS шлюза и поэтому мешает наполнению ipset по доменным именам.
 
-## Configuration Reference
+## Основные параметры
 
-Important settings in `config/vpngateway.conf`:
+Важные настройки в `config/vpngateway.conf`:
 
-| Setting | Purpose |
+| Параметр | Назначение |
 |---|---|
-| `GATEWAY_IP` | Static LAN address of VPN Gateway |
-| `GATEWAY_HOSTNAME` | HTTPS hostname and certificate name |
-| `LAN_SUBNET` | Local client network |
-| `LAN_GATEWAY` | Direct ISP/router next hop |
-| `LAN_INTERFACE` | Physical LAN interface |
-| `VPN_INTERFACE` | AmneziaWG interface, normally `amn0` |
-| `XRAY_TUN_INTERFACE` | XRay TUN interface, normally `xray0` |
-| `XRAY_OUTBOUND_INTERFACE` | Physical interface used by XRay provider sockets |
-| `DNS_UPSTREAM` | Upstream resolvers routed through the selected external tunnel |
-| `DNS_LOCAL_ZONES` | Optional local-zone forwarding rules |
-| `DNS_LOCAL_HOSTS` | Optional static local DNS records |
-| `API_ALLOWED_SUBNETS` | Networks allowed to access the administration API |
-| `FWMARK` | Mark used for selected VPN destinations |
-| `XRAY_BYPASS_MARK` | Mark used to keep XRay provider sockets outside `xray0` |
+| `GATEWAY_IP` | Статический LAN-адрес VPN Gateway |
+| `GATEWAY_HOSTNAME` | HTTPS hostname и имя в сертификате |
+| `LAN_SUBNET` | Локальная клиентская сеть |
+| `LAN_GATEWAY` | Прямой next hop к ISP/роутеру |
+| `LAN_INTERFACE` | Физический LAN-интерфейс |
+| `VPN_INTERFACE` | AmneziaWG-интерфейс, обычно `amn0` |
+| `XRAY_TUN_INTERFACE` | XRay TUN-интерфейс, обычно `xray0` |
+| `XRAY_OUTBOUND_INTERFACE` | Физический интерфейс для provider sockets XRay |
+| `DNS_UPSTREAM` | Upstream DNS, маршрутизируемые через выбранный внешний туннель |
+| `DNS_LOCAL_ZONES` | Опциональные правила пересылки локальных DNS-зон |
+| `DNS_LOCAL_HOSTS` | Опциональные статические локальные DNS-записи |
+| `API_ALLOWED_SUBNETS` | Сети, которым разрешён доступ к API администратора |
+| `FWMARK` | Метка для выбранных VPN-направлений |
+| `XRAY_BYPASS_MARK` | Метка, удерживающая provider sockets вне `xray0` |
 
-## Building and Validation
+## Сборка и проверка
 
-Validate Python and shell sources:
+Проверка Python и shell-файлов:
 
 ```bash
 python3 -m compileall -q api scripts
 bash -n install.sh scripts/*.sh
 ```
 
-Build and test the Outline Shadowsocks helper:
+Сборка и тест Outline Shadowsocks helper:
 
 ```bash
 go test ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 go build ./cmd/vpngw-outline-ss-local
 ```
 
-Build the optional Flutter client:
+Сборка опционального Flutter-клиента:
 
 ```bash
 cd mobile
@@ -215,9 +216,9 @@ flutter test
 flutter build apk --release
 ```
 
-The public mobile source uses the operating-system trust store. Install the gateway CA on the device before connecting to a self-signed gateway.
+Публичная версия мобильного клиента использует системное хранилище доверенных сертификатов. Перед подключением к шлюзу с self-signed сертификатом установите CA шлюза на устройство.
 
-## Operational Checks
+## Эксплуатационные проверки
 
 ```bash
 systemctl status vpngw-api vpngw-external-tunnel vpngw-routing dnsmasq
@@ -227,12 +228,16 @@ ipset list vpn_domains
 curl -k https://127.0.0.1/api/v1/health
 ```
 
-Do not switch or restart an active tunnel during testing unless an interruption is acceptable. Back up `/opt/vpngateway`, relevant systemd units, and routing state before upgrading an installed gateway.
+Не переключайте и не перезапускайте активный туннель во время проверки, если обрыв соединения недопустим. Перед обновлением установленного шлюза сделайте backup `/opt/vpngateway`, затрагиваемых systemd units и текущего routing state.
 
-## Security
+## Безопасность
 
-- Never commit VPN profiles, private keys, subscription URLs, UUIDs, passwords, `.env` files, or generated certificates.
-- Restrict the administration API with `API_ALLOWED_SUBNETS` and a host firewall.
-- Keep runtime configuration directories mode `700` and secret files mode `600`.
-- Review generated routes and firewall rules before using all-VPN mode.
-- Treat config uploads and subscription data as credentials.
+- Никогда не коммитьте VPN-профили, private keys, URL подписок, UUID, пароли, `.env` и сгенерированные сертификаты.
+- Ограничьте API администратора через `API_ALLOWED_SUBNETS` и firewall хоста.
+- Используйте mode `700` для runtime-каталогов конфигурации и `600` для секретных файлов.
+- Проверяйте созданные маршруты и firewall rules перед включением all-VPN режима.
+- Считайте загруженные конфиги и данные подписок учётными данными.
+
+## Лицензия
+
+VPN Gateway распространяется по [лицензии MIT](LICENSE).
