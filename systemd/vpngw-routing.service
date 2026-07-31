@@ -1,0 +1,13 @@
+[Unit]
+Description=VPN Gateway Split Tunneling Routing
+After=network-online.target dnsmasq.service vpngw-external-tunnel.service
+Wants=network-online.target vpngw-external-tunnel.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/vpngateway/scripts/vpngw-setup-routing.sh
+ExecStop=/opt/vpngateway/scripts/vpngw-teardown-routing.sh
+
+[Install]
+WantedBy=multi-user.target

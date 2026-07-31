@@ -1,0 +1,15 @@
+# Mail service domains routed through the selected external VPN tunnel.
+# dnsmasq matches each listed domain and all subdomains.
+
+# Gmail / Google Mail. google.com in main.lst covers mail.google.com and
+# accounts.google.com; these entries cover Gmail-specific and static hosts.
+gmail.com
+googlemail.com
+gstatic.com
+googleusercontent.com
+
+# Proton Mail / Proton account and legacy mail domains.
+proton.me
+protonmail.com
+protonmail.ch
+pm.me

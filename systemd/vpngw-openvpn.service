@@ -1,0 +1,26 @@
+[Unit]
+Description=VPN Gateway OpenVPN client (split-route, advertised subnets only)
+Documentation=man:openvpn(8)
+After=network-online.target vpngw-routing.service
+Wants=network-online.target
+# Note: NOT bound to vpngw-vpn (Amnezia). The two tunnels run independently
+# and serve different traffic — Amnezia handles the public-internet split,
+# this OpenVPN reaches private subnets pushed by the OpenVPN server only.
+
+[Service]
+Type=simple
+ExecStart=/opt/vpngateway/scripts/vpngw-openvpn-run.sh
+# openvpn --down runs as part of the openvpn process when SIGTERM arrives,
+# so we don't need ExecStop. KillMode=mixed lets the down script complete.
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=15
+Restart=on-failure
+RestartSec=10
+PIDFile=/run/vpngw-openvpn.pid
+# Keep its own state dir under /run/ for the pushed-routes marker etc.
+RuntimeDirectory=vpngw-openvpn
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target

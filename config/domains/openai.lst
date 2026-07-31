@@ -1,0 +1,50 @@
+# OpenAI / ChatGPT / Codex domains.
+#
+# Source: OpenAI Help Center, "Network recommendations for ChatGPT errors
+# on web and apps" (OpenAI/ChatGPT domains to allowlist + WebSocket
+# requirements for ChatGPT and Codex).
+#
+# dnsmasq's ipset=/domain/... directive matches the listed domain and all
+# subdomains, so OpenAI wildcard entries are represented by their base
+# domain without "*.".
+
+# --- Core OpenAI / ChatGPT / Codex ---
+openai.com
+chatgpt.com
+oaistatic.com
+oaiusercontent.com
+openaimerge.com
+
+# ChatGPT/Codex WebSocket endpoints are covered by chatgpt.com, but keep
+# explicit hosts here so the operational requirement is visible.
+ws.chatgpt.com
+tcr9i.chat.openai.com
+
+# --- Authentication / workspace identity ---
+auth.openai.com
+auth0.openai.com
+setup.auth.openai.com
+workos.com
+workoscdn.com
+workos.imgix.net
+
+# --- Telemetry / feature flags / diagnostics used by ChatGPT apps ---
+statsig.com
+statsigapi.net
+events.statsigapi.net
+featuregates.org
+featureassets.org
+sentry.io
+datadoghq.com
+rum.browser-intake-datadoghq.com
+
+# --- Support / messaging / transactional dependencies ---
+intercom.io
+intercomcdn.com
+sendgrid.net
+stripe.com
+
+# --- Security challenges / platform attestation ---
+challenges.cloudflare.com
+apple.com
+prodregistryv2.org

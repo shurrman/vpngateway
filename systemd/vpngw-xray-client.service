@@ -1,0 +1,26 @@
+[Unit]
+Description=VPN Gateway XRay Client Tunnel (xray0)
+Documentation=https://xtls.github.io/en/config/inbounds/tun.html
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# XRay creates a TUN interface, so keep root/CAP_NET_ADMIN. Runtime config is
+# rendered from /opt/vpngateway/config/xray-client/configs/.active.
+User=root
+Group=root
+ExecStartPre=/bin/sh -c 'test -x /usr/local/bin/xray || { echo "xray binary missing; run /opt/vpngateway/scripts/vpngw-install-xray-core.sh"; exit 78; }'
+ExecStartPre=/usr/bin/install -d -m 0755 /var/log/xray
+ExecStartPre=/opt/vpngateway/scripts/vpngw-xray-client-render-config.py
+ExecStart=/opt/vpngateway/scripts/vpngw-xray-client-start.sh
+Restart=on-failure
+RestartPreventExitStatus=78 203
+RestartSec=5
+LimitNOFILE=65536
+ReadWritePaths=/opt/vpngateway/config/xray-client /var/log/xray /run /dev/net/tun
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

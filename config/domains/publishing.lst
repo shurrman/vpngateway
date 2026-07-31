@@ -1,0 +1,8 @@
+# Publishing platforms routed through Amnezia.
+#
+# `gitconnected.com` covers levelup.gitconnected.com.
+# `medium.com` covers Medium-owned assets used by custom-domain publications
+# (miro.medium.com, cdn-client.medium.com, glyph.medium.com, etc.).
+
+gitconnected.com
+medium.com

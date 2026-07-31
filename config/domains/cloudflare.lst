@@ -1,0 +1,28 @@
+# Cloudflare-related domains routed through Amnezia.
+#
+# Why a separate category: Cloudflare's dash + login flow grew its own
+# little fan-out (RUM telemetry on a *different* TLD, plus DataDog
+# intake), and one of the entries below is a tricky sibling-label
+# trap. Keeping them together makes it easy to disable the whole
+# group as a unit (rename the file and run vpngw-update-domains.sh).
+
+# Core: dash, docs, workers, challenges (Turnstile). Covers all
+# *.cloudflare.com. Without VPN the ISP route to CF edge is unstable —
+# Turnstile returns 403 on dash.cloudflare.com; through Amnezia ok.
+cloudflare.com
+
+# Cloudflare RUM telemetry. Different TLD — the cloudflare.com mask
+# above does NOT match this. Without it the login flow hangs because
+# the JS waits for an insights beacon that never returns.
+cloudflareinsights.com
+
+# Cloudflare ships client-side metrics/logs into DataDog (US5 region):
+#   * http-intake.logs.us5.datadoghq.com   — true subdomain, caught by
+#     the datadoghq.com mask
+#   * browser-intake-us5-datadoghq.com     — NOT a subdomain. It's a
+#     sibling label in the .com TLD ("browser-intake-us5-datadoghq" is
+#     the entire leftmost label, no dot before "datadoghq"). dnsmasq
+#     matches by dot boundaries, so the mask does not catch it —
+#     it needs its own line.
+datadoghq.com
+browser-intake-us5-datadoghq.com

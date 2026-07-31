@@ -1,0 +1,10 @@
+[Unit]
+Description=VPN Gateway IP Lists Update Timer
+
+[Timer]
+# Run 2 minutes after boot, then every 6 hours
+OnBootSec=2min
+OnUnitActiveSec=6h
+
+[Install]
+WantedBy=timers.target

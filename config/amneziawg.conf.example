@@ -1,0 +1,37 @@
+# AmneziaWG configuration for VPN Gateway
+# Copy this file to amneziawg.conf and fill in your VPN provider credentials.
+# The install script will deploy it to /etc/amnezia/amneziawg/<VPN_INTERFACE>.conf
+#
+# To extract config from AmneziaVPN .vpn file:
+#   python3 -m amnezia_vpn_to_wg_config amnezia_config.vpn
+#
+# IMPORTANT: Do NOT set DNS here — dnsmasq handles DNS on the gateway.
+# IMPORTANT: Table = off is required — our scripts manage routing via policy routing.
+
+[Interface]
+PrivateKey = <YOUR_PRIVATE_KEY>
+Address = <YOUR_VPN_ADDRESS>/32
+Table = off
+
+# AmneziaWG obfuscation parameters (from your VPN provider)
+# These must match the server configuration.
+Jc = <JUNK_PACKET_COUNT>
+Jmin = <JUNK_PACKET_MIN_SIZE>
+Jmax = <JUNK_PACKET_MAX_SIZE>
+S1 = <INIT_PACKET_JUNK_SIZE>
+S2 = <RESPONSE_PACKET_JUNK_SIZE>
+H1 = <INIT_PACKET_MAGIC_HEADER>
+H2 = <RESPONSE_PACKET_MAGIC_HEADER>
+H3 = <UNDERLOAD_PACKET_MAGIC_HEADER>
+H4 = <TRANSPORT_PACKET_MAGIC_HEADER>
+
+# VPN Gateway hooks — called by awg-quick on tunnel up/down
+PostUp = /opt/vpngateway/scripts/vpngw-fix-routes.sh
+PostDown = /opt/vpngateway/scripts/vpngw-on-vpn-down.sh
+
+[Peer]
+PublicKey = <SERVER_PUBLIC_KEY>
+PresharedKey = <PRESHARED_KEY>
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = <SERVER_IP>:<SERVER_PORT>
+PersistentKeepalive = 25

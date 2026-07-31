@@ -1,0 +1,13 @@
+[Unit]
+Description=VPN Gateway AmneziaWG Tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/awg-quick up amn0
+ExecStop=/usr/bin/awg-quick down amn0
+
+[Install]
+WantedBy=multi-user.target

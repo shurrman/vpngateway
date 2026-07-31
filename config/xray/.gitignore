@@ -1,0 +1,7 @@
+# All runtime state for the xray inbound — per-deployment secrets and
+# the generated active config. Only the *.template / *.example /
+# README files in this dir live in git.
+server.json
+server-params.json
+clients.json
+stub/

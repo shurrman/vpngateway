@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VPN Gateway</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/static/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+  <!-- Cache-busting: __VER__ is replaced server-side with API_VERSION on every
+       GET / so a deploy invalidates the browser cache for JS/CSS automatically. -->
+  <link rel="stylesheet" href="/static/css/style.css?v=__VER__">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">&#9681;</span>
+      <span class="sidebar-title">VPN Gateway</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#/" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">&#9635;</span><span class="nav-label">Dashboard</span>
+      </a>
+      <a href="#/domains" class="nav-item" data-page="domains">
+        <span class="nav-icon">&#9729;</span><span class="nav-label">Domains</span>
+      </a>
+      <a href="#/networks" class="nav-item" data-page="networks">
+        <span class="nav-icon">&#9736;</span><span class="nav-label">Networks</span>
+      </a>
+      <a href="#/routing" class="nav-item" data-page="routing">
+        <span class="nav-icon">&#8644;</span><span class="nav-label">Routing</span>
+      </a>
+      <a href="#/services" class="nav-item" data-page="services">
+        <span class="nav-icon">&#9881;</span><span class="nav-label">Services</span>
+      </a>
+      <a href="#/dns" class="nav-item" data-page="dns">
+        <span class="nav-icon">&#9993;</span><span class="nav-label">DNS</span>
+      </a>
+      <a href="#/notifications" class="nav-item" data-page="notifications">
+        <span class="nav-icon">&#9888;</span><span class="nav-label">Alerts</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer" id="sidebarVersion" style="padding:12px 16px;font-size:11px;color:var(--text-dim);margin-top:auto;border-top:1px solid var(--border)"></div>
+  </aside>
+
+  <main class="main-content" id="content">
+    <div class="loading">Loading...</div>
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <!-- Modal backdrop -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="window.closeModal()"></div>
+  <div class="modal" id="modal"></div>
+
+  <script src="/static/js/api.js?v=__VER__"></script>
+  <script src="/static/js/pages/dashboard.js?v=__VER__"></script>
+  <script src="/static/js/pages/domains.js?v=__VER__"></script>
+  <script src="/static/js/pages/networks.js?v=__VER__"></script>
+  <script src="/static/js/pages/routing.js?v=__VER__"></script>
+  <script src="/static/js/pages/services.js?v=__VER__"></script>
+  <script src="/static/js/pages/dns.js?v=__VER__"></script>
+  <script src="/static/js/pages/notifications.js?v=__VER__"></script>
+  <script src="/static/js/app.js?v=__VER__"></script>
+</body>
+</html>

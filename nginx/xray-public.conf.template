@@ -1,0 +1,79 @@
+# nginx server block for the cloud VM's vpn.example.com:443
+# inbound. Fronts the xray VLESS+XHTTP service. Variables that need
+# substituting before installing:
+#   __PUBLIC_HOST__   -> e.g. vpn.example.com
+#   __XHTTP_PATH__    -> the secret path from server-params.json
+#                        (starts with `/`, e.g. /a1b2c3...)
+#   __XRAY_PORT__     -> internal xray port, default 8443
+#
+# Substitute with sed, e.g.:
+#   sed \
+#     -e "s|__PUBLIC_HOST__|vpn.example.com|g" \
+#     -e "s|__XHTTP_PATH__|$(jq -r .xhttp_path /opt/vpngateway/config/xray/server-params.json)|g" \
+#     -e "s|__XRAY_PORT__|8443|g" \
+#     nginx/vpngateway.conf.template > /etc/nginx/sites-available/vpngateway
+#
+# certbot will rewrite ssl_certificate / ssl_certificate_key paths after
+# `certbot --nginx -d __PUBLIC_HOST__`.
+
+# ACME challenge over HTTP (port 80 is already taken by the admin nginx,
+# so we share the /.well-known/acme-challenge/ location with it — see
+# nginx/vpngateway-admin.conf.template).
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name __PUBLIC_HOST__;
+
+    # PLACEHOLDER paths — certbot will replace these with the live LE
+    # cert paths after the first issuance.
+    ssl_certificate     /etc/letsencrypt/live/__PUBLIC_HOST__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__PUBLIC_HOST__/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # Cosmetic stealth — don't broadcast "this is xray behind nginx".
+    server_tokens off;
+
+    # XHTTP transport endpoint. Path is a per-deployment secret; any
+    # client that doesn't hit it falls through to the stub page below.
+    #
+    # XHTTP uses long-polling HTTP/2 streams. Two things matter:
+    #   1. proxy_buffering off — otherwise nginx waits for a full
+    #      response before forwarding, killing real-time streams.
+    #   2. proxy_request_buffering off — same for upstream-direction.
+    #   3. proxy_read_timeout very large — long-poll connections can
+    #      idle for minutes between keepalives.
+    location __XHTTP_PATH__ {
+        if ($request_method !~ ^(GET|POST)$ ) { return 405; }
+        proxy_pass http://127.0.0.1:__XRAY_PORT__;
+        proxy_http_version 1.1;
+        proxy_buffering         off;
+        proxy_request_buffering off;
+        proxy_set_header  Host              $host;
+        proxy_set_header  X-Real-IP         $remote_addr;
+        proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header  X-Forwarded-Proto $scheme;
+        proxy_set_header  Connection        "";
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        client_max_body_size 0;
+        chunked_transfer_encoding on;
+    }
+
+    # Default: serve the stub site under /opt/vpngateway/config/xray/stub/.
+    # This is the "default page" anyone hitting https://vpngateway.../ sees.
+    # Looks like a vanilla static landing page; no admin links visible.
+    location / {
+        root /opt/vpngateway/config/xray/stub;
+        index index.html;
+        try_files $uri $uri/ =404;
+        add_header Cache-Control "public, max-age=300";
+    }
+
+    # Standard hardening — don't serve dotfiles, hide nginx version.
+    location ~ /\. { deny all; access_log off; log_not_found off; }
+}

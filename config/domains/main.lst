@@ -1,0 +1,65 @@
+# Domains to route through VPN tunnel
+# One domain per line, comments start with #
+# Subdomains are included automatically by dnsmasq
+
+# YouTube
+google.com
+youtube.com
+googlevideo.com
+ytimg.com
+youtu.be
+ggpht.com
+googleapis.com
+youtube-nocookie.com
+youtubeeducation.com
+
+# Facebook
+facebook.com
+facebook.net
+fbcdn.net
+fb.com
+
+# Instagram
+instagram.com
+cdninstagram.com
+
+# Claude / Anthropic
+claude.ai
+anthropic.com
+claude.com
+
+# Telegram
+cdn-telegram.org
+comments.app
+contest.com
+fragment.com
+graph.org
+quiz.directory
+t.me
+tdesktop.com
+telega.one
+telegra.ph
+telegram-cdn.org
+telegram.dog
+telegram.me
+telegram.org
+telegram.space
+telesco.pe
+tg.dev
+ton.org
+tx.me
+usercontent.dev
+
+
+# WhatsApp
+whatsapp.com
+whatsapp.net
+wa.me
+
+# WhatsApp calls (STUN/TURN via Google)
+stun1.l.google.com
+stun2.l.google.com
+stun3.l.google.com
+stun4.l.google.com
+
+# Cloudflare-related entries moved to config/domains/cloudflare.lst.

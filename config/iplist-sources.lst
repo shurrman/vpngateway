@@ -1,0 +1,6 @@
+# URLs with IP ranges (CIDR) to add to VPN ipset
+# One URL per line, comments start with #
+# Each URL should return plain text with one CIDR per line
+#
+# Note: For static IP ranges (Meta, WhatsApp, etc.) use *-networks.lst
+# files in the config directory instead — they are loaded at boot.
