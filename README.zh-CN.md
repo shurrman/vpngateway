@@ -48,7 +48,7 @@ XRay 到服务提供商的连接使用独立 bypass mark，并绑定物理网卡
 - 内核支持 `iptables`、`ipset` 和 `dnsmasq`。
 - 使用 AmneziaWG 时需要对应内核模块。在容器环境中，应在宿主机安装并加载该模块。
 - 至少一个 AmneziaWG 或 XRay 配置。
-- 编译 Outline Shadowsocks helper 时需要 Go 1.25 或更高版本。
+- 编译 Outline Shadowsocks helper 时需要 Go 1.25.12 或更高版本。
 - 编译可选移动客户端时需要 Flutter 3.41.9 或更高版本。
 
 安装程序会修改 DNS、IP 转发、systemd 服务和路由。对现有远程服务器安装前，应确保拥有控制台访问和可执行的回滚方案。

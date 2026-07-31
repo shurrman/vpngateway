@@ -49,7 +49,7 @@ XRay provider sockets use a separate bypass mark and the physical LAN interface.
 - `iptables`, `ipset`, and `dnsmasq` support.
 - An AmneziaWG kernel module when using the Amnezia backend. In an unprivileged container, the module must be installed and loaded on the host.
 - At least one AmneziaWG config or one XRay VLESS/Shadowsocks config.
-- Go 1.25 or newer only when building the Outline Shadowsocks helper locally.
+- Go 1.25.12 or newer only when building the Outline Shadowsocks helper locally.
 - Flutter 3.41.9 or newer only when building the optional mobile client.
 
 Do not install this on a remote production gateway without console access and a rollback plan. The installer changes DNS, forwarding, systemd units, and routing services.

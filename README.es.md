@@ -48,7 +48,7 @@ Los sockets que conectan XRay con el proveedor usan una marca de bypass y la int
 - Compatibilidad con `iptables`, `ipset` y `dnsmasq`.
 - Módulo AmneziaWG en el kernel si se usa ese backend. En un contenedor, el módulo debe instalarse y cargarse en el host.
 - Al menos una configuración AmneziaWG o XRay.
-- Go 1.25 o posterior para compilar el helper Shadowsocks de Outline.
+- Go 1.25.12 o posterior para compilar el helper Shadowsocks de Outline.
 - Flutter 3.41.9 o posterior para compilar el cliente móvil opcional.
 
 El instalador modifica DNS, forwarding, unidades systemd y rutas. Utilice acceso por consola y prepare una copia de seguridad antes de ejecutarlo sobre una máquina existente.
