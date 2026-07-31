@@ -1,0 +1,13 @@
+[Unit]
+Description=VPN Gateway VPN Interface Monitor
+After=vpngw-routing.service vpngw-external-tunnel.service
+Requires=vpngw-routing.service
+
+[Service]
+Type=simple
+ExecStart=/opt/vpngateway/scripts/vpngw-watch-vpn.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

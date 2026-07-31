@@ -1,0 +1,84 @@
+{
+  "_comment": "REFERENCE ONLY — the live config is produced by vpngw-xray-render-config.py from server-params.json + clients.json. This file shows the schema we generate; keep it in sync if the renderer changes.",
+
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/xray/access.log",
+    "error":  "/var/log/xray/error.log"
+  },
+
+  "//": "stats + policy + api → enables /xray/status to read per-direction bytes",
+  "stats": {},
+  "policy": {
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    },
+    "levels": {
+      "0": { "statsUserUplink": true, "statsUserDownlink": true }
+    }
+  },
+  "api": {
+    "tag": "api",
+    "services": ["StatsService"]
+  },
+
+  "inbounds": [
+    {
+      "//": "Internal stats gRPC endpoint — read by vpngw-xray-stats.sh",
+      "tag": "api",
+      "listen": "127.0.0.1",
+      "port": 10085,
+      "protocol": "dokodemo-door",
+      "settings": { "address": "127.0.0.1" }
+    },
+    {
+      "//": "Public inbound: VLESS over XHTTP transport. TLS is terminated by nginx in front (LE cert for vpn.example.com). xray itself listens on plain HTTP and 127.0.0.1 only — never directly exposed.",
+      "tag": "vless-in",
+      "listen": "127.0.0.1",
+      "port": 8443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          { "id": "<UUID>", "level": 0, "email": "<name>@vpngateway" }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "none",
+        "xhttpSettings": {
+          "path": "<XHTTP_PATH>",
+          "host": "<PUBLIC_HOST>",
+          "mode": "auto"
+        }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    }
+  ],
+
+  "outbounds": [
+    {
+      "//": "Default egress = freedom (direct), but with SO_MARK=1 so policy routing puts every packet onto amn0 (table 100). See vpngw-setup-routing.sh `ip rule fwmark 0x1`.",
+      "tag": "amnezia",
+      "protocol": "freedom",
+      "settings": { "domainStrategy": "UseIP" },
+      "streamSettings": { "sockopt": { "mark": 1 } }
+    },
+    {
+      "//": "Hard-drop RFC1918 destinations — clients shouldn't be able to scan our LAN via the proxy.",
+      "tag": "blocked",
+      "protocol": "blackhole"
+    }
+  ],
+
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      { "type": "field", "inboundTag": ["api"], "outboundTag": "api" },
+      { "type": "field", "ip": ["geoip:private"], "outboundTag": "blocked" }
+    ]
+  }
+}

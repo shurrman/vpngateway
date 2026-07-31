@@ -1,0 +1,25 @@
+# Developer tooling domains routed through the selected external VPN tunnel.
+# dnsmasq matches each listed domain and all subdomains.
+
+# Terraform Registry and HashiCorp release/checkpoint endpoints.
+terraform.io
+registry.terraform.io
+hashicorp.com
+releases.hashicorp.com
+checkpoint-api.hashicorp.com
+
+# Proxmox package repositories and CDN mirrors.
+download.proxmox.com
+cdn.proxmox.com
+
+# Build tools and source hosting.
+services.gradle.org
+plugins.gradle.org
+github.com
+release-assets.githubusercontent.com
+entire.io
+
+# Liquibase documentation and project sites.
+www.liquibase.org
+liquibase.org
+liquibaseorg.wpengine.com

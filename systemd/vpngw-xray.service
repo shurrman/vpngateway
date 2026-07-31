@@ -1,0 +1,36 @@
+[Unit]
+Description=VPN Gateway XRay (VLESS+XHTTP, egress via amn0)
+Documentation=https://xtls.github.io/
+# Why depend on vpngw-routing AND vpngw-vpn?
+#   vpngw-routing : sets up `ip rule fwmark 0x1 lookup 100` + table 100
+#                   default via amn0. Xray's outbound packets carry
+#                   SO_MARK=1 (sockopt.mark in server.json), so they
+#                   need this rule to reach the tunnel.
+#   vpngw-vpn     : amn0 must exist before xray dials anything. If amn0
+#                   is missing fwmark routes go through main table and
+#                   leak via the public iface.
+After=network-online.target vpngw-routing.service vpngw-vpn.service
+Wants=network-online.target
+Requires=vpngw-vpn.service
+
+[Service]
+Type=simple
+# Run as root — xray needs CAP_NET_ADMIN to set SO_MARK on its sockets
+# (the whole point of this service is that its outbound packets get
+# fwmark 0x1 so policy routing puts them on amn0). Locking it down to
+# nogroup + AmbientCapabilities works too but is fragile across distros.
+User=root
+Group=root
+ExecStartPre=/opt/vpngateway/scripts/vpngw-xray-render-config.sh
+ExecStart=/usr/local/bin/xray run -c /opt/vpngateway/config/xray/server.json
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+# Don't grant write access to most of the FS — xray only writes to
+# /var/log/xray/ and reads /opt/vpngateway/config/xray/.
+ReadWritePaths=/var/log/xray /run
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

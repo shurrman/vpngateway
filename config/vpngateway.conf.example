@@ -1,0 +1,55 @@
+# VPN Gateway configuration
+# Edit these values before running install.sh
+# All scripts and the API read this file at startup.
+
+# --- Network ---
+# IP address of this gateway machine
+GATEWAY_IP=192.168.50.2
+# Hostname of this gateway (used in certificates and notifications)
+GATEWAY_HOSTNAME=gateway.lan
+# LAN subnet
+LAN_SUBNET=192.168.50.0/24
+# LAN gateway (ISP router)
+LAN_GATEWAY=192.168.50.1
+# LAN network interface name
+LAN_INTERFACE=eth0
+# VPN tunnel interface name (AmneziaWG interface, matches config filename in /etc/amnezia/amneziawg/)
+VPN_INTERFACE=amn0
+# XRay client TUN interface name for the alternative public-internet tunnel
+XRAY_TUN_INTERFACE=xray0
+# IPv4 address assigned by vpngw scripts to XRay's Linux TUN interface
+XRAY_TUN_ADDRESS=198.18.0.1/30
+# Physical interface XRay uses for its own provider connection to avoid xray0 loops
+XRAY_OUTBOUND_INTERFACE=eth0
+
+# --- DNS ---
+# Upstream DNS servers (space-separated)
+DNS_UPSTREAM="8.8.8.8 8.8.4.4"
+# dnsmasq cache and concurrent upstream query limits. LAN clients can create
+# bursts of uncached queries, especially when DNS redirect is enabled.
+DNS_CACHE_SIZE=10000
+DNS_FORWARD_MAX=1000
+# Local DNS zones forwarded to LAN router (space-separated, format: zone/server)
+DNS_LOCAL_ZONES="lan/192.168.50.1"
+# Local DNS host overrides served directly by dnsmasq (space-separated, format: host/ip)
+DNS_LOCAL_HOSTS="router.lan/192.168.50.1"
+
+# --- API access control ---
+# Comma-separated CIDR subnets allowed to access the admin API.
+#   192.168.50.0/24  — home LAN (where the gateway lives)
+#   10.0.0.0/8       — OpenVPN tun client pool (10.8.0.x) and any other
+#                      RFC1918 10.x subnets the OpenVPN server may push
+#   127.0.0.0/8      — localhost (gateway's own processes)
+API_ALLOWED_SUBNETS="192.168.50.0/24,127.0.0.0/8"
+
+# --- Advanced (usually no need to change) ---
+IPSET_NAME=vpn_domains
+IPSET_MAXELEM=131072
+FWMARK=0x1
+# Socket mark used by XRay client outbound connections to bypass xray0 loop.
+XRAY_BYPASS_MARK=0x2
+ROUTING_TABLE=100
+
+# --- XRay public-inbound (cloud-VM only) ---
+# Leave empty on a local gateway; vpngw-xray stays unconfigured/hidden.
+XRAY_PUBLIC_HOST=

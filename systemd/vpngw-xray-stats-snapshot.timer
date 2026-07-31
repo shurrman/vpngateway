@@ -1,0 +1,16 @@
+[Unit]
+Description=Periodically snapshot xray stats (every 60s)
+# OnBootSec=2min gives the box time to come up + vpngw-xray to start.
+# OnUnitActiveSec=1min keeps the persisted file at most ~60 sec stale,
+# which is enough resolution for a dashboard polled at 10 sec — the
+# snapshot script is also called inline by vpngw-xray-stats.py on every
+# /api/v1/xray/status request, so the timer is the safety net for the
+# "no UI is watching" case (xray crashes silently between API polls).
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

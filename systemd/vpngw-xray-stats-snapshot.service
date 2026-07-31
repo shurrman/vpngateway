@@ -1,0 +1,16 @@
+[Unit]
+Description=Snapshot xray stats counters to /var/lib/vpngw-xray/stats.json
+# We intentionally don't bind to vpngw-xray.service — even if xray is
+# down, the snapshot script handles that case gracefully (returns
+# empty current values, leaves persisted totals untouched).
+After=vpngw-xray.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vpngateway/scripts/vpngw-xray-stats-snapshot.py
+# State dir is created by the script itself with mode 755.
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

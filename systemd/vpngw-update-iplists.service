@@ -1,0 +1,8 @@
+[Unit]
+Description=VPN Gateway IP Lists Update
+After=vpngw-routing.service
+Requires=vpngw-routing.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vpngateway/scripts/vpngw-update-iplists.sh

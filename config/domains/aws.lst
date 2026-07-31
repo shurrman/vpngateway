@@ -1,0 +1,48 @@
+# AWS domains — Console, regional API endpoints, static assets
+# Resolved IPs end up in ipset vpn_domains via /etc/dnsmasq.d/vpn-domains-aws.conf
+# Generated dnsmasq directives match the listed domain AND all its subdomains,
+# so wildcard parents cover most cases (e.g. amazonaws.com → s3.us-east-1.amazonaws.com).
+
+# --- Global (covers all regions and most services) ---
+# All *.amazonaws.com regional/service endpoints: s3.us-east-1.amazonaws.com,
+# ec2.us-west-2.amazonaws.com, dynamodb.eu-central-1.amazonaws.com, etc.
+amazonaws.com
+
+# AWS Console UI, signin, docs, marketing.
+aws.amazon.com
+
+# Static console assets (CDN-fronted): a0.awsstatic.com etc.
+awsstatic.com
+a.b.cdn.console.awsstatic.com
+
+# Console CDN edge with random subdomains: a.b.cdn.console.awstatic.com,
+# *.cdn.console.awstatic.com — note: separate domain from awsstatic.com,
+# Amazon uses both. Verified via SOA: both delegate to awsdns-*.
+awstatic.com
+
+# Misc Amazon-controlled control-plane assets used by Console.
+a2z.com
+aws.dev
+
+# --- us-east-1 (N. Virginia) — explicit hosts in case wildcard match misses ---
+us-east-1.amazonaws.com
+us-east-1.console.aws.amazon.com
+us-east-1.signin.aws.amazon.com
+oidc.us-east-1.amazonaws.com
+
+# --- us-west-2 (Oregon) — explicit hosts ---
+us-west-2.amazonaws.com
+us-west-2.console.aws.amazon.com
+us-west-2.signin.aws.amazon.com
+oidc.us-west-2.amazonaws.com
+
+# --- Notes ---
+# - cloudfront.net is intentionally NOT listed: it would route every
+#   CloudFront customer (millions of sites) through the VPN. Add specific
+#   distribution IDs (e.g. d2c5q2y2zvrvg6.cloudfront.net) only if the
+#   Console or a service really needs them and you've confirmed the host
+#   in the browser network tab.
+# - amazonaws.com.cn (AWS China) and amazonaws-us-gov.com (GovCloud) are
+#   intentionally NOT listed — different infrastructure, add only on demand.
+
+continuum.console.api.aws

@@ -1,0 +1,14 @@
+[Unit]
+Description=VPN Gateway External Tunnel Selector
+After=network-online.target
+Wants=network-online.target
+Before=vpngw-routing.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c 'target=amnezia; [ -s /opt/vpngateway/config/external-tunnel ] && target=$(tr -d "[:space:]" < /opt/vpngateway/config/external-tunnel); /opt/vpngateway/scripts/vpngw-select-external-tunnel.sh "$target"'
+ExecStop=/opt/vpngateway/scripts/vpngw-select-external-tunnel.sh none
+
+[Install]
+WantedBy=multi-user.target

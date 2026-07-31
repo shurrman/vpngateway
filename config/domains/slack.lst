@@ -1,0 +1,26 @@
+# Slack domains routed through the selected external VPN tunnel.
+#
+# Source: Slack Help Center, "Manage Slack connection issues"; Slack uses
+# WebSocket over port 443 and calls out wss-primary.slack.com,
+# wss-backup.slack.com, and wss-mobile.slack.com for connection testing.
+# Slack also recommends checking the workspace-specific URL allowlist at
+# https://my.slack.com/help/urls.
+#
+# dnsmasq's ipset=/domain/... directive matches the listed domain and all
+# subdomains, so slack.com covers app/workspace/API/files/WSS hosts under
+# *.slack.com. The additional Slack-owned base domains cover common client
+# asset, message, file, redirect, and edge/CDN hosts.
+
+# Core app, workspace, API, file, and WebSocket hosts.
+slack.com
+wss-primary.slack.com
+wss-backup.slack.com
+wss-mobile.slack.com
+
+# Slack-owned assets, edge/CDN, messages, files, and redirect hosts.
+slack-edge.com
+slack-files.com
+slack-imgs.com
+slack-msgs.com
+slack-redir.net
+slackb.com

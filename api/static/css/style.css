@@ -1,0 +1,988 @@
+/* VPN Gateway Admin Console — Dark Theme */
+
+:root {
+  --bg: #0f1117;
+  --bg-secondary: #161822;
+  --card: #1c1f2e;
+  --card-hover: #232640;
+  --border: #2a2d3e;
+  --text: #e1e4ed;
+  --text-dim: #8b8fa3;
+  --accent: #6c8cff;
+  --accent-hover: #8ba3ff;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fbbf24;
+  --radius: 10px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --sidebar-w: 220px;
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.2s;
+}
+.sidebar-header {
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo { font-size: 24px; color: var(--accent); }
+.sidebar-title { font-size: 15px; font-weight: 600; }
+.sidebar-nav { display: flex; flex-direction: column; padding: 8px; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.nav-item:hover { background: var(--card); color: var(--text); }
+.nav-item.active { background: var(--accent); color: #fff; }
+.nav-icon { font-size: 18px; width: 22px; text-align: center; }
+
+/* Main */
+.main-content {
+  margin-left: var(--sidebar-w);
+  padding: 24px;
+  flex: 1;
+  min-height: 100vh;
+}
+body.dash-view .sidebar { display: none; }
+body.dash-view .main-content {
+  margin-left: 0;
+  width: 100%;
+  padding: 16px;
+}
+body.dash-view .page-header { margin-bottom: 16px; }
+body.dash-view .card { box-shadow: none; }
+
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title { font-size: 22px; font-weight: 600; }
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.card-value { font-size: 28px; font-weight: 700; }
+.card-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* Status indicators */
+.status { display: inline-flex; align-items: center; gap: 6px; }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.up { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.down { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin-bottom: 20px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+th, td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: var(--bg-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+td { font-size: 13px; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--card-hover); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--card); color: var(--text); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-icon { padding: 6px 8px; font-size: 16px; line-height: 1; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Forms */
+input, textarea, select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  width: 100%;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(108,140,255,0.2);
+}
+textarea { font-family: var(--mono); resize: vertical; min-height: 200px; }
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tab {
+  padding: 10px 18px;
+  cursor: pointer;
+  color: var(--text-dim);
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+}
+.modal-backdrop.show { display: block; }
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  min-width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 201;
+  display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.modal.show { display: block; }
+.modal-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 16px; right: 16px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 400px;
+  font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  animation: slideIn 0.2s ease-out;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast-close {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Log panel */
+.log-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 400px;
+  overflow-y: auto;
+  color: var(--text-dim);
+  margin-top: 12px;
+}
+
+/* Progress bar */
+.progress {
+  background: var(--bg);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+/* Service card */
+.service-card { display: flex; align-items: center; gap: 14px; }
+.service-info { flex: 1; }
+.service-name { font-weight: 600; font-size: 14px; }
+.service-state { font-size: 12px; color: var(--text-dim); }
+.service-actions { display: flex; gap: 6px; }
+
+/* Group section */
+.group-section { margin-bottom: 20px; }
+.group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.domain-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent);
+  font-family: inherit;
+  margin-bottom: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.domain-group-toggle:hover { background: var(--card-hover); }
+.domain-group-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.domain-group-caret {
+  display: inline-flex;
+  justify-content: center;
+  width: 12px;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.domain-group-toggle[aria-expanded="true"] .domain-group-caret {
+  transform: rotate(90deg);
+}
+.domain-group-count {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+.domain-group-body { padding-top: 8px; }
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-dim);
+}
+
+/* Inline result */
+.inline-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--mono);
+  background: var(--bg);
+  margin-left: 8px;
+}
+.inline-result.ok { color: var(--green); }
+.inline-result.fail { color: var(--red); }
+
+/* VPN Tunnel card — endpoint / tunnel / exit pool rows */
+.vpn-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.vpn-line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  line-height: 1.35;
+  min-width: 0;
+}
+.vpn-line.vpn-pool { align-items: flex-start; }
+.vpn-label {
+  flex: 0 0 auto;
+  width: 62px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.65;
+}
+.vpn-value {
+  min-width: 0;
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.vpn-pool-items {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.vpn-pool-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 6px;
+  row-gap: 1px;
+  align-items: baseline;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.vpn-pool-flag { font-size: 13px; line-height: 1; }
+.vpn-pool-ip {
+  color: var(--text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.vpn-pool-svc {
+  grid-column: 2;
+  color: var(--text-dim);
+  opacity: 0.6;
+  font-size: 10px;
+  line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dashboard top area — keep the two external VPN tunnel cards side by side.
+   Network starts on the next row so the Amnezia card has enough room for its
+   status/details column and the configs picker. */
+.card-grid.dashboard-top {
+  grid-template-columns: repeat(2, minmax(420px, 1fr));
+}
+
+/* VPN Tunnel card with config picker. Inside the card we still split into
+   a flexible main column and a fixed-width configs column. */
+.vpn-tunnel-card {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: stretch;
+}
+.vpn-tunnel-main { flex: 1 1 auto; min-width: 0; }
+.vpn-tunnel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.vpn-configs {
+  flex: 0 0 auto;
+  min-width: 300px;
+  max-width: min(430px, 46%);
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vpn-configs-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.vpn-config {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.vpn-config:hover { background: rgba(108, 140, 255, 0.10); }
+.vpn-config.active {
+  background: rgba(52, 211, 153, 0.18);
+  cursor: default;
+  font-weight: 600;
+}
+.vpn-config.active::after {
+  content: '●';
+  color: var(--green);
+  margin-left: auto;
+  font-size: 10px;
+}
+.vpn-config.has-actions.active::after { content: none; }
+.vpn-config.switching { opacity: 0.55; cursor: progress; }
+.vpn-configs.switching .vpn-config { pointer-events: none; }
+.vpn-config-flag { font-size: 16px; line-height: 1; }
+.vpn-config-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vpn-active-dot {
+  flex: 0 0 auto;
+  color: var(--green);
+  font-size: 10px;
+}
+.vpn-configs-empty {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* OpenVPN tile — separate auxiliary tunnel for server-pushed subnets.
+   Lives in the dashboard top grid below the external tunnel cards. */
+.ovpn-card {
+  display: flex;
+  flex-direction: column;
+}
+.ovpn-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ovpn-toggle,
+.vpn-toggle,
+.xray-client-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--text);
+}
+.ovpn-toggle .ovpn-toggle-track,
+.vpn-toggle .ovpn-toggle-track,
+.xray-client-toggle .ovpn-toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 18px;
+  border-radius: 10px;
+  background: #3a3d52;
+  transition: background 0.18s;
+}
+.ovpn-toggle .ovpn-toggle-dot,
+.vpn-toggle .ovpn-toggle-dot,
+.xray-client-toggle .ovpn-toggle-dot {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #d0d3e0;
+  transition: left 0.18s, background 0.18s;
+}
+.ovpn-toggle.on .ovpn-toggle-track,
+.vpn-toggle.on .ovpn-toggle-track,
+.xray-client-toggle.on .ovpn-toggle-track { background: var(--green); }
+.ovpn-toggle.on .ovpn-toggle-dot,
+.vpn-toggle.on .ovpn-toggle-dot,
+.xray-client-toggle.on .ovpn-toggle-dot { left: 20px; background: #fff; }
+.ovpn-toggle .ovpn-toggle-label,
+.vpn-toggle .ovpn-toggle-label,
+.xray-client-toggle .ovpn-toggle-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--text-dim);
+}
+.ovpn-toggle.on .ovpn-toggle-label,
+.vpn-toggle.on .ovpn-toggle-label,
+.xray-client-toggle.on .ovpn-toggle-label { color: var(--green); }
+.ovpn-toggle.busy,
+.vpn-toggle.busy,
+.xray-client-toggle.busy { opacity: 0.55; cursor: progress; pointer-events: none; }
+
+.ovpn-routes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.ovpn-route {
+  display: inline-block;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(108, 140, 255, 0.13);
+  color: var(--accent);
+  border: 1px solid rgba(108, 140, 255, 0.3);
+}
+
+.ovpn-configs,
+.xray-client-configs {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.xray-configs-head,
+.xray-client-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.xray-configs-head span,
+.xray-client-group-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xray-mini-btn,
+.xray-config-ping {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 6px;
+}
+.xray-hard-test-btn {
+  min-width: 68px;
+}
+.xray-danger-btn {
+  color: #f87171;
+}
+.xray-hard-rate {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 700;
+}
+.xray-hard-rate.ok {
+  color: #34d399;
+}
+.xray-hard-rate.fail {
+  color: #f87171;
+}
+.xray-hard-rate.pending {
+  color: var(--text-dim);
+}
+.xray-ping-result {
+  flex: 0 0 auto;
+  min-width: 34px;
+  color: var(--text-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+.xray-group-ping-result {
+  min-width: 28px;
+}
+.xray-mini-btn:hover,
+.xray-config-ping:hover {
+  color: var(--text);
+  border-color: rgba(108, 140, 255, 0.45);
+  background: rgba(108, 140, 255, 0.14);
+}
+.xray-danger-btn:hover {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+.xray-client-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.xray-client-group-head {
+  min-width: 0;
+}
+.xray-client-group-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  padding: 3px 0;
+  text-align: left;
+}
+.xray-client-group-caret,
+.xray-client-group-count {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.xray-client-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 9px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.xray-group-error {
+  color: var(--red);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.ovpn-config,
+.xray-client-config {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  padding: 5px 7px;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.ovpn-config:hover,
+.xray-client-config:hover {
+  background: rgba(108, 140, 255, 0.10);
+  border-color: rgba(108, 140, 255, 0.22);
+}
+.ovpn-config.active,
+.xray-client-config.active {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.28);
+  cursor: default;
+}
+.ovpn-config.active::after,
+.xray-client-config.active::after {
+  content: '●';
+  color: var(--green);
+  margin-left: auto;
+  font-size: 10px;
+}
+.ovpn-config.switching,
+.ovpn-configs.switching .ovpn-config,
+.xray-client-config.switching,
+.xray-client-configs.switching .xray-client-config {
+  opacity: 0.55;
+  cursor: progress;
+  pointer-events: none;
+}
+.ovpn-config-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ovpn-config-endpoint {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+}
+
+/* XRay (VLESS+XHTTP) dashboard tile. Reuses .ovpn-card layout — same
+   header-with-toggle pattern — but customizes the "manage clients"
+   link beneath the client count. */
+.xray-card .xray-clients-link {
+  margin-left: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.xray-card .xray-clients-link:hover { color: #fff; }
+
+/* The XRay-clients modal — wide table rendered inside #modal by
+   showModal(). Modal expands automatically (via :has() selector below)
+   when this table is present, so the columns get room to breathe. */
+.modal:has(.xray-clients-wrap) {
+  min-width: 720px;
+  width: min(1100px, 92vw);
+}
+.xray-clients-wrap {
+  max-height: 56vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.xray-clients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.xray-clients-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.xray-clients-table tbody td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.xray-clients-table tbody tr:last-child > td { border-bottom: none; }
+.xray-clients-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+.xray-cell-name {
+  font-weight: 600;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xray-config-ping {
+  margin-left: auto;
+}
+.xray-config-ping.xray-hard-test-btn {
+  margin-left: 0;
+}
+.xray-cell-date {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.xray-cell-action  { text-align: center; }
+.xray-cell-stat    {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* "VLESS" / "QR" — link-styled affordances; not actual <a href> targets. */
+.xray-link {
+  color: var(--accent);
+  text-decoration: underline dotted;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.xray-link:hover { color: #fff; text-decoration: underline; }
+
+/* Revoke = red cross. Button, not link — semantically destructive. */
+.xray-revoke {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--red, #e25b5b);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.xray-revoke:hover {
+  background: rgba(226, 91, 91, 0.12);
+  border-color: rgba(226, 91, 91, 0.5);
+}
+
+/* QR display row — full-width expansion below its client row. */
+.xray-qr-row { background: rgba(108, 140, 255, 0.04); }
+.xray-qr-cell { padding: 16px 10px !important; text-align: center; }
+.xray-qr-display {
+  display: inline-block;
+  padding: 12px;
+  background: #fff;
+  border-radius: 6px;
+}
+.xray-qr-display svg {
+  display: block;
+  width: 240px;
+  height: 240px;
+}
+
+/* On narrow viewports drop the modal min-width so the table reflows
+   (horizontal scroll inside .xray-clients-wrap). */
+@media (max-width: 760px) {
+  .modal:has(.xray-clients-wrap) {
+    min-width: auto;
+    width: 92vw;
+  }
+}
+
+.status-dot.pending {
+  background: var(--orange, #ffa940);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Bandwidth chart */
+.bandwidth-card { margin-bottom: 20px; }
+.bw-canvas-wrap { width: 100%; }
+.bw-canvas-wrap canvas { display: block; width: 100%; }
+.bw-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.bw-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.bw-legend-item b { color: var(--text); font-weight: 600; }
+.bw-dot {
+  width: 10px; height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .card-grid { grid-template-columns: 1fr; }
+  .card-grid.dashboard-top { grid-template-columns: 1fr; }
+  .modal { min-width: auto; width: 90vw; }
+  /* On narrow screens stack the picker below the status block */
+  .vpn-tunnel-card { flex-direction: column; }
+  .vpn-configs {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 12px;
+    max-width: none;
+  }
+}
+
+/* Medium screens — the 2fr/1fr/1fr layout gets cramped if the viewport
+   is narrow but still desktop-ish; collapse to a single column for VPN
+   and a two-up row for LAN+Internet. */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .card-grid.dashboard-top {
+    grid-template-columns: 1fr 1fr;
+  }
+  .vpn-tunnel-card { grid-column: 1 / -1; }
+}

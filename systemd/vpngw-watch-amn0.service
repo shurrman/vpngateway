@@ -1,0 +1,13 @@
+[Unit]
+Description=VPN Gateway amn0 Interface Monitor
+After=vpngw-routing.service
+Requires=vpngw-routing.service
+
+[Service]
+Type=simple
+ExecStart=/opt/vpngateway/scripts/vpngw-watch-amn0.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=VPN Gateway Health Check
+After=vpngw-routing.service dnsmasq.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vpngateway/scripts/vpngw-health-check.sh

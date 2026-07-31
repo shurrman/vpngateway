@@ -1,0 +1,25 @@
+# Runtime secrets and generated state
+.env
+*.key
+*.ovpn
+certs/
+config/amneziawg.conf
+config/configs/
+config/openvpn/
+config/xray-client/
+config/xray/clients.json
+config/xray/server-keys.json
+config/xray/server-params.json
+
+# Local tooling and build output
+.claude/
+.codex/
+.idea/
+.vscode/
+.DS_Store
+__pycache__/
+*.pyc
+mobile/.dart_tool/
+mobile/.flutter-plugins-dependencies
+mobile/build/
+*.apk

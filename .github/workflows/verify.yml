@@ -1,0 +1,52 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python syntax
+        run: python3 -m compileall -q api scripts
+      - name: Shell syntax
+        run: bash -n install.sh scripts/*.sh
+      - name: Go tests
+        run: go test ./...
+      - name: Public tree policy
+        run: |
+          test ! -e MEMORY.md
+          test ! -e AGENTS.md
+          test ! -e CLAUDE.md
+          test ! -e CHANGELOG.md
+          test ! -e PLAN.md
+          test ! -e QUICKSTART.md
+          test "$(find . -type f -name '*.md' | wc -l)" -eq 3
+          ! git grep -n -E 'BEGIN (OPENSSH|RSA|EC|PRIVATE) PRIVATE KEY'
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.9'
+          channel: stable
+          cache: true
+      - name: Flutter dependencies
+        working-directory: mobile
+        run: flutter pub get
+      - name: Flutter analysis
+        working-directory: mobile
+        run: flutter analyze
+      - name: Flutter tests
+        working-directory: mobile
+        run: flutter test
