@@ -15,7 +15,7 @@ jobs:
     if: github.repository == 'shurrman/vpngateway'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install package build tools
@@ -31,7 +31,7 @@ jobs:
       - name: Verify release artifacts
         run: packaging/verify-release.sh "$GITHUB_REF_NAME" dist
       - name: Attest release artifacts
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'dist/*'
       - name: Create or update GitHub Release
