@@ -43,7 +43,7 @@ VPN Gateway - самостоятельно разворачиваемый Linux-
 
 ## Требования
 
-- Отдельная машина, VM или контейнер с Debian 12 либо Ubuntu 24.04.
+- Отдельная машина, VM или контейнер с Debian 12, Ubuntu 24.04 либо системой семейства Fedora/RHEL с systemd.
 - Root-доступ и systemd.
 - Статический LAN-адрес шлюза.
 - Поддержка `iptables`, `ipset` и `dnsmasq`.
@@ -55,6 +55,46 @@ VPN Gateway - самостоятельно разворачиваемый Linux-
 Не устанавливайте проект на удалённый production-шлюз без консольного доступа и проверенного плана отката. Установщик меняет DNS, forwarding, systemd units и сервисы маршрутизации.
 
 ## Установка
+
+### Пакеты из GitHub Release
+
+Скачайте `SHA256SUMS` и подходящий файл из Releases, затем проверьте checksum:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+DEB:
+
+```bash
+sudo apt install ./vpngateway_<VERSION>_all.deb
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+RPM:
+
+```bash
+sudo dnf install ./vpngateway-<VERSION>-1.noarch.rpm
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+Установка DEB/RPM только размещает payload. Она не включает сервисы и не меняет DNS или маршруты: эти действия начинаются после явного запуска `vpngateway-install`. RPM-путь сначала проверяйте с консольным доступом на конкретном дистрибутиве, включая его SELinux/firewalld policy.
+
+Переносимый архив не требует Git:
+
+```bash
+tar -xzf vpngateway-<VERSION>-linux.tar.gz
+cd vpngateway-<VERSION>
+cp config/vpngateway.conf.example config/vpngateway.conf
+sudoedit config/vpngateway.conf
+sudo ./install.sh
+```
+
+### Установка из исходников
 
 Клонируйте репозиторий и создайте локальную конфигурацию:
 
@@ -85,7 +125,7 @@ sudo ./install.sh
 
 Установщик:
 
-1. Устанавливает необходимые Debian-пакеты.
+1. Устанавливает необходимые пакеты через `apt-get`, `dnf` или `yum`.
 2. Создаёт `/opt/vpngateway`.
 3. Устанавливает XRay и при необходимости собирает Outline Shadowsocks helper.
 4. Генерирует локальный CA и HTTPS-сертификат сервера.

@@ -43,7 +43,7 @@ XRay provider sockets use a separate bypass mark and the physical LAN interface.
 
 ## Requirements
 
-- A dedicated Debian 12 or Ubuntu 24.04 machine, VM, or container.
+- A dedicated Debian 12, Ubuntu 24.04, or Fedora/RHEL-family machine, VM, or container with systemd.
 - Root access and systemd.
 - A static LAN address for the gateway.
 - `iptables`, `ipset`, and `dnsmasq` support.
@@ -55,6 +55,46 @@ XRay provider sockets use a separate bypass mark and the physical LAN interface.
 Do not install this on a remote production gateway without console access and a rollback plan. The installer changes DNS, forwarding, systemd units, and routing services.
 
 ## Installation
+
+### GitHub Release packages
+
+Download `SHA256SUMS` and the appropriate artifact from Releases, then verify it:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+DEB:
+
+```bash
+sudo apt install ./vpngateway_<VERSION>_all.deb
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+RPM:
+
+```bash
+sudo dnf install ./vpngateway-<VERSION>-1.noarch.rpm
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+Installing a DEB/RPM only places the payload. It does not enable services or change DNS and routes; those actions begin only when `vpngateway-install` is run explicitly. Validate the RPM path with console access on the target distribution, including its SELinux and firewalld policy, before production use.
+
+The portable bundle does not require Git:
+
+```bash
+tar -xzf vpngateway-<VERSION>-linux.tar.gz
+cd vpngateway-<VERSION>
+cp config/vpngateway.conf.example config/vpngateway.conf
+sudoedit config/vpngateway.conf
+sudo ./install.sh
+```
+
+### Source checkout
 
 Clone the repository and create a local configuration:
 
@@ -85,7 +125,7 @@ sudo ./install.sh
 
 The installer:
 
-1. Installs required Debian packages.
+1. Installs required packages through `apt-get`, `dnf`, or `yum`.
 2. Creates `/opt/vpngateway`.
 3. Installs XRay and optionally builds the Outline Shadowsocks helper.
 4. Generates a local CA and an HTTPS server certificate.

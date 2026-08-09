@@ -6,6 +6,7 @@ on:
 
 jobs:
   test:
+    if: github.repository == 'shurrman/vpngateway'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +19,7 @@ jobs:
       - name: Python syntax
         run: python3 -m compileall -q api scripts
       - name: Shell syntax
-        run: bash -n install.sh scripts/*.sh
+        run: bash -n install.sh scripts/*.sh packaging/*.sh packaging/vpngateway-install
       - name: Go tests
         run: go test ./...
       - name: Go vulnerability scan
@@ -36,6 +37,7 @@ jobs:
           ! git grep -n -E 'BEGIN (OPENSSH|RSA|EC|PRIVATE) PRIVATE KEY'
 
   mobile:
+    if: github.repository == 'shurrman/vpngateway'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,3 +55,15 @@ jobs:
       - name: Flutter tests
         working-directory: mobile
         run: flutter test
+
+  packages:
+    if: github.repository == 'shurrman/vpngateway'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install package build tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rpm
+      - name: Build release packages
+        run: packaging/build-release.sh "$(sed -n 's/^API_VERSION = "\([^"]*\)"/\1/p' api/config.py)" dist
+      - name: Verify release packages
+        run: packaging/verify-release.sh "$(sed -n 's/^API_VERSION = "\([^"]*\)"/\1/p' api/config.py)" dist

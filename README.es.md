@@ -43,7 +43,7 @@ Los sockets que conectan XRay con el proveedor usan una marca de bypass y la int
 
 ## Requisitos
 
-- Debian 12 o Ubuntu 24.04 con systemd.
+- Debian 12, Ubuntu 24.04 o una distribución de la familia Fedora/RHEL con systemd.
 - Acceso root y una dirección LAN estática.
 - Compatibilidad con `iptables`, `ipset` y `dnsmasq`.
 - Módulo AmneziaWG en el kernel si se usa ese backend. En un contenedor, el módulo debe instalarse y cargarse en el host.
@@ -54,6 +54,46 @@ Los sockets que conectan XRay con el proveedor usan una marca de bypass y la int
 El instalador modifica DNS, forwarding, unidades systemd y rutas. Utilice acceso por consola y prepare una copia de seguridad antes de ejecutarlo sobre una máquina existente.
 
 ## Instalación
+
+### Paquetes de GitHub Release
+
+Descargue `SHA256SUMS` y el artefacto adecuado desde Releases y compruebe su integridad:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+DEB:
+
+```bash
+sudo apt install ./vpngateway_<VERSION>_all.deb
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+RPM:
+
+```bash
+sudo dnf install ./vpngateway-<VERSION>-1.noarch.rpm
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+La instalación de DEB/RPM solo copia el payload. No activa servicios ni cambia DNS o rutas; esas acciones comienzan únicamente al ejecutar `vpngateway-install`. Antes de usar RPM en producción, valide la distribución concreta con acceso por consola y revise SELinux y firewalld.
+
+El archivo portable no requiere Git:
+
+```bash
+tar -xzf vpngateway-<VERSION>-linux.tar.gz
+cd vpngateway-<VERSION>
+cp config/vpngateway.conf.example config/vpngateway.conf
+sudoedit config/vpngateway.conf
+sudo ./install.sh
+```
+
+### Instalación desde el código fuente
 
 ```bash
 git clone https://github.com/shurrman/vpngateway.git

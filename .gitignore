@@ -23,3 +23,8 @@ mobile/.dart_tool/
 mobile/.flutter-plugins-dependencies
 mobile/build/
 *.apk
+dist/
+*.deb
+*.rpm
+vpngateway-*-linux.tar.gz
+SHA256SUMS

@@ -9,7 +9,37 @@ set -euo pipefail
 
 INSTALL_DIR="/opt/vpngateway"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONF_FILE="$SCRIPT_DIR/config/vpngateway.conf"
+CONF_FILE="${VPNGATEWAY_CONF_FILE:-$SCRIPT_DIR/config/vpngateway.conf}"
+
+install_os_packages() {
+    local -a packages
+
+    if command -v apt-get >/dev/null 2>&1; then
+        packages=(
+            ca-certificates curl dnsmasq iproute2 ipset iptables openssl
+            python3-pip python3-venv unzip
+        )
+        apt-get update -qq
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${packages[@]}" > /dev/null
+    elif command -v dnf >/dev/null 2>&1; then
+        packages=(
+            ca-certificates curl dnsmasq iproute ipset iptables openssl
+            python3 python3-pip systemd unzip
+        )
+        dnf install -y -q "${packages[@]}"
+    elif command -v yum >/dev/null 2>&1; then
+        packages=(
+            ca-certificates curl dnsmasq iproute ipset iptables openssl
+            python3 python3-pip systemd unzip
+        )
+        yum install -y -q "${packages[@]}"
+    else
+        echo "ERROR: supported package manager not found (apt-get, dnf, or yum)" >&2
+        exit 1
+    fi
+
+    echo "Packages installed: ${packages[*]}"
+}
 
 # --- Check root ---
 if [[ $EUID -ne 0 ]]; then
@@ -20,7 +50,7 @@ fi
 # --- Check config ---
 if [[ ! -f "$CONF_FILE" ]]; then
     echo "ERROR: $CONF_FILE not found"
-    echo "Copy config/vpngateway.conf.example and edit it first."
+    echo "Copy config/vpngateway.conf.example and edit it first, or set VPNGATEWAY_CONF_FILE."
     exit 1
 fi
 
@@ -36,9 +66,7 @@ echo ""
 
 # --- Install packages ---
 echo "--- Installing packages ---"
-apt-get update -qq
-apt-get install -y -qq dnsmasq ipset curl openssl unzip ca-certificates > /dev/null
-echo "Packages installed: dnsmasq, ipset, curl, openssl, unzip, ca-certificates"
+install_os_packages
 
 # --- Disable systemd-resolved (conflicts with dnsmasq on port 53) ---
 if systemctl is-active --quiet systemd-resolved; then
@@ -64,12 +92,12 @@ for config_file in \
     iplist-sources.lst \
     mode \
     notifications.conf \
-    sysctl-vpngateway.conf \
-    vpngateway.conf; do
+    sysctl-vpngateway.conf; do
     if [[ -f "$SCRIPT_DIR/config/$config_file" ]]; then
         cp "$SCRIPT_DIR/config/$config_file" "$INSTALL_DIR/config/"
     fi
 done
+install -m 0600 "$CONF_FILE" "$INSTALL_DIR/config/vpngateway.conf"
 find "$SCRIPT_DIR/config" -maxdepth 1 -type f -name '*-networks.lst' \
     -exec cp {} "$INSTALL_DIR/config/" \;
 mkdir -p "$INSTALL_DIR/config/domains" "$INSTALL_DIR/config/xray"
@@ -118,7 +146,6 @@ echo "Files copied to $INSTALL_DIR"
 
 # --- Prepare API (Python venv, deps installed later after DNS is up) ---
 echo "--- Preparing API ---"
-apt-get install -y -qq python3-pip python3-venv > /dev/null 2>&1
 if [[ ! -d "$INSTALL_DIR/api/venv" ]]; then
     python3 -m venv "$INSTALL_DIR/api/venv"
     echo "Python venv created"

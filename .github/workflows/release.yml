@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    if: github.repository == 'shurrman/vpngateway'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install package build tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rpm
+      - name: Validate release tag
+        run: |
+          version="$(sed -n 's/^API_VERSION = "\([^"]*\)"/\1/p' api/config.py)"
+          test "$GITHUB_REF_NAME" = "v$version"
+      - name: Build release artifacts
+        run: |
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          packaging/build-release.sh "$GITHUB_REF_NAME" dist
+      - name: Verify release artifacts
+        run: packaging/verify-release.sh "$GITHUB_REF_NAME" dist
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/*'
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/*               --title "VPN Gateway $GITHUB_REF_NAME"               --generate-notes
+          fi

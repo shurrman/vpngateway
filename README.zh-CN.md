@@ -43,7 +43,7 @@ XRay 到服务提供商的连接使用独立 bypass mark，并绑定物理网卡
 
 ## 系统要求
 
-- Debian 12 或 Ubuntu 24.04，使用 systemd。
+- Debian 12、Ubuntu 24.04，或使用 systemd 的 Fedora/RHEL 系列发行版。
 - root 权限和固定局域网地址。
 - 内核支持 `iptables`、`ipset` 和 `dnsmasq`。
 - 使用 AmneziaWG 时需要对应内核模块。在容器环境中，应在宿主机安装并加载该模块。
@@ -54,6 +54,46 @@ XRay 到服务提供商的连接使用独立 bypass mark，并绑定物理网卡
 安装程序会修改 DNS、IP 转发、systemd 服务和路由。对现有远程服务器安装前，应确保拥有控制台访问和可执行的回滚方案。
 
 ## 安装
+
+### GitHub Release 软件包
+
+从 Releases 下载 `SHA256SUMS` 和对应的软件包，然后验证校验和：
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+DEB：
+
+```bash
+sudo apt install ./vpngateway_<VERSION>_all.deb
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+RPM：
+
+```bash
+sudo dnf install ./vpngateway-<VERSION>-1.noarch.rpm
+sudo cp -n /etc/vpngateway/vpngateway.conf.example /etc/vpngateway/vpngateway.conf
+sudoedit /etc/vpngateway/vpngateway.conf
+sudo vpngateway-install
+```
+
+安装 DEB/RPM 只会放置 payload，不会启用服务，也不会修改 DNS 或路由；只有显式运行 `vpngateway-install` 后才会开始这些操作。生产使用 RPM 前，应在目标发行版上通过控制台验证，并检查 SELinux 与 firewalld 策略。
+
+便携归档不需要 Git：
+
+```bash
+tar -xzf vpngateway-<VERSION>-linux.tar.gz
+cd vpngateway-<VERSION>
+cp config/vpngateway.conf.example config/vpngateway.conf
+sudoedit config/vpngateway.conf
+sudo ./install.sh
+```
+
+### 从源码安装
 
 ```bash
 git clone https://github.com/shurrman/vpngateway.git
