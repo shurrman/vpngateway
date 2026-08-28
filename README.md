@@ -47,10 +47,22 @@ VPN Gateway - самостоятельно разворачиваемый Linux-
 - Root-доступ и systemd.
 - Статический LAN-адрес шлюза.
 - Поддержка `iptables`, `ipset` и `dnsmasq`.
-- Модуль AmneziaWG в ядре при использовании Amnezia backend. В непривилегированном контейнере модуль должен быть установлен и загружен на хосте.
+- AmneziaWG 3.1 при использовании Amnezia backend. Проект фиксирует tools `v3.1.20260812` и kernel module `v3.1.20260827`; в контейнере модуль устанавливается на хосте.
 - Хотя бы один конфиг AmneziaWG либо XRay VLESS/Shadowsocks.
 - Go 1.25.12 или новее только для локальной сборки Outline Shadowsocks helper.
 - Flutter 3.41.9 или новее только для сборки опционального мобильного клиента.
+
+AmneziaWG устанавливается отдельной явной командой и не активируется автоматически:
+
+```bash
+# VM или bare metal; загруженный модуль не перезапускается
+sudo ./scripts/vpngw-install-amneziawg.sh all
+
+# Только после удаления всех AmneziaWG-интерфейсов
+sudo ./scripts/vpngw-install-amneziawg.sh module --reload-module
+```
+
+Для LXC выполните `tools` внутри контейнера, а `module --reload-module` на host. Скрипт требует headers текущего `uname -r`, не обновляет ядро, не переключает VPN backend и создаёт rollback в `/opt/vpngateway-backups/`. После установки DEB/RPM тот же скрипт доступен как `/opt/vpngateway/scripts/vpngw-install-amneziawg.sh` после явного запуска `vpngateway-install`.
 
 Не устанавливайте проект на удалённый production-шлюз без консольного доступа и проверенного плана отката. Установщик меняет DNS, forwarding, systemd units и сервисы маршрутизации.
 

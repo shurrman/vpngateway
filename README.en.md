@@ -47,10 +47,22 @@ XRay provider sockets use a separate bypass mark and the physical LAN interface.
 - Root access and systemd.
 - A static LAN address for the gateway.
 - `iptables`, `ipset`, and `dnsmasq` support.
-- An AmneziaWG kernel module when using the Amnezia backend. In an unprivileged container, the module must be installed and loaded on the host.
+- AmneziaWG 3.1 when using the Amnezia backend. The project pins tools `v3.1.20260812` and kernel module `v3.1.20260827`; containers use the host kernel module.
 - At least one AmneziaWG config or one XRay VLESS/Shadowsocks config.
 - Go 1.25.12 or newer only when building the Outline Shadowsocks helper locally.
 - Flutter 3.41.9 or newer only when building the optional mobile client.
+
+AmneziaWG installation is separate and explicit; it never activates a tunnel automatically:
+
+```bash
+# VM or bare metal; does not reload an already loaded module
+sudo ./scripts/vpngw-install-amneziawg.sh all
+
+# Only after every AmneziaWG interface has been removed
+sudo ./scripts/vpngw-install-amneziawg.sh module --reload-module
+```
+
+For LXC, run `tools` inside the container and `module --reload-module` on the host. The script requires headers for the current `uname -r`, does not upgrade the kernel or switch the VPN backend, and creates a rollback under `/opt/vpngateway-backups/`. After DEB/RPM setup, the same script is available at `/opt/vpngateway/scripts/vpngw-install-amneziawg.sh` once `vpngateway-install` has been run explicitly.
 
 Do not install this on a remote production gateway without console access and a rollback plan. The installer changes DNS, forwarding, systemd units, and routing services.
 

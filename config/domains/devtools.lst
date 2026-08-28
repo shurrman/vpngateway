@@ -19,6 +19,9 @@ github.com
 release-assets.githubusercontent.com
 entire.io
 
+# NVIDIA OpenAI-compatible developer API.
+integrate.api.nvidia.com
+
 # Liquibase documentation and project sites.
 www.liquibase.org
 liquibase.org

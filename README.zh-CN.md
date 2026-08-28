@@ -46,10 +46,22 @@ XRay 到服务提供商的连接使用独立 bypass mark，并绑定物理网卡
 - Debian 12、Ubuntu 24.04，或使用 systemd 的 Fedora/RHEL 系列发行版。
 - root 权限和固定局域网地址。
 - 内核支持 `iptables`、`ipset` 和 `dnsmasq`。
-- 使用 AmneziaWG 时需要对应内核模块。在容器环境中，应在宿主机安装并加载该模块。
+- 使用 AmneziaWG backend 时需要 AmneziaWG 3.1。项目固定 tools `v3.1.20260812` 和 kernel module `v3.1.20260827`；容器使用宿主机内核模块。
 - 至少一个 AmneziaWG 或 XRay 配置。
 - 编译 Outline Shadowsocks helper 时需要 Go 1.25.12 或更高版本。
 - 编译可选移动客户端时需要 Flutter 3.41.9 或更高版本。
+
+AmneziaWG 需要单独显式安装，且不会自动激活隧道：
+
+```bash
+# VM 或 bare metal；不会重载已加载的模块
+sudo ./scripts/vpngw-install-amneziawg.sh all
+
+# 仅在所有 AmneziaWG 接口都已删除后执行
+sudo ./scripts/vpngw-install-amneziawg.sh module --reload-module
+```
+
+LXC 环境中，在容器内运行 `tools`，在宿主机运行 `module --reload-module`。脚本要求当前 `uname -r` 对应的 headers，不升级内核、不切换 VPN backend，并在 `/opt/vpngateway-backups/` 下创建 rollback。安装 DEB/RPM 并显式执行 `vpngateway-install` 后，同一脚本位于 `/opt/vpngateway/scripts/vpngw-install-amneziawg.sh`。
 
 安装程序会修改 DNS、IP 转发、systemd 服务和路由。对现有远程服务器安装前，应确保拥有控制台访问和可执行的回滚方案。
 

@@ -46,10 +46,22 @@ Los sockets que conectan XRay con el proveedor usan una marca de bypass y la int
 - Debian 12, Ubuntu 24.04 o una distribución de la familia Fedora/RHEL con systemd.
 - Acceso root y una dirección LAN estática.
 - Compatibilidad con `iptables`, `ipset` y `dnsmasq`.
-- Módulo AmneziaWG en el kernel si se usa ese backend. En un contenedor, el módulo debe instalarse y cargarse en el host.
+- AmneziaWG 3.1 si se usa ese backend. El proyecto fija tools `v3.1.20260812` y kernel module `v3.1.20260827`; los contenedores usan el módulo del host.
 - Al menos una configuración AmneziaWG o XRay.
 - Go 1.25.12 o posterior para compilar el helper Shadowsocks de Outline.
 - Flutter 3.41.9 o posterior para compilar el cliente móvil opcional.
+
+La instalación de AmneziaWG es independiente y explícita; nunca activa un túnel automáticamente:
+
+```bash
+# VM o bare metal; no recarga un módulo ya cargado
+sudo ./scripts/vpngw-install-amneziawg.sh all
+
+# Solo después de eliminar todas las interfaces AmneziaWG
+sudo ./scripts/vpngw-install-amneziawg.sh module --reload-module
+```
+
+Para LXC, ejecute `tools` dentro del contenedor y `module --reload-module` en el host. El script requiere headers para el `uname -r` actual, no actualiza el kernel ni cambia el backend VPN y crea un rollback en `/opt/vpngateway-backups/`. Después de instalar DEB/RPM, el mismo script queda disponible en `/opt/vpngateway/scripts/vpngw-install-amneziawg.sh` una vez ejecutado explícitamente `vpngateway-install`.
 
 El instalador modifica DNS, forwarding, unidades systemd y rutas. Utilice acceso por consola y prepare una copia de seguridad antes de ejecutarlo sobre una máquina existente.
 
