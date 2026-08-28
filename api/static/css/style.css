@@ -151,6 +151,62 @@ td { font-size: 13px; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--card-hover); }
 
+/* Runtime LAN host access control */
+.hosts-card { padding: 0; overflow: hidden; }
+.hosts-card .table-wrap { margin-bottom: 0; }
+.hosts-table th:last-child,
+.hosts-table td:last-child { text-align: right; }
+.host-ip,
+.host-mac { font-family: var(--mono); white-space: nowrap; }
+.host-device { min-width: 190px; max-width: 360px; color: var(--text-dim); }
+.host-access-cell { width: 190px; }
+.host-access-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  min-width: 134px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.host-toggle-track {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--red);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.13);
+  transition: background 0.18s ease;
+}
+.host-toggle-dot {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.18s ease;
+}
+.host-access-toggle.on .host-toggle-track { background: var(--green); }
+.host-access-toggle.on .host-toggle-dot { left: 23px; }
+.host-toggle-label { min-width: 70px; font-size: 12px; font-weight: 700; color: var(--red); }
+.host-access-toggle.on .host-toggle-label { color: var(--green); }
+.host-access-toggle.busy { opacity: 0.55; pointer-events: none; cursor: progress; }
+.hosts-note { padding: 12px 14px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 12px; }
+.hosts-empty { padding: 28px 14px; text-align: center !important; color: var(--text-dim); }
+
+@media (max-width: 680px) {
+  .host-access-cell { width: 150px; }
+  .host-access-toggle { min-width: 112px; }
+  .host-toggle-label { min-width: 54px; font-size: 11px; }
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

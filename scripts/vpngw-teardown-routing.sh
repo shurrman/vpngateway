@@ -10,7 +10,10 @@ CONF="/opt/vpngateway/config/vpngateway.conf"
 AMNEZIA_IF="${VPN_INTERFACE:-amn0}"
 XRAY_IF="${XRAY_TUN_INTERFACE:-xray0}"
 LAN_IF="${LAN_INTERFACE:-ens160}"
+LAN_NET="${LAN_SUBNET:-192.168.50.0/24}"
 IPSET_NAME="${IPSET_NAME:-vpn_domains}"
+HOST_BLOCK_IPSET="${HOST_BLOCK_IPSET:-vpngw_blocked_hosts}"
+HOST_ACTIVE_IPSET="${HOST_ACTIVE_IPSET:-vpngw_active_hosts}"
 FWMARK="${FWMARK:-0x1}"
 TABLE="${ROUTING_TABLE:-100}"
 
@@ -28,6 +31,12 @@ ipt_del() {
 }
 
 # --- Remove FORWARD rules ---
+ipt_del filter FORWARD -i "$LAN_IF" -j SET --add-set "$HOST_ACTIVE_IPSET" src --exist || true
+ipt_del filter FORWARD -i "$LAN_IF" -s "$LAN_NET" -j SET --add-set "$HOST_ACTIVE_IPSET" src --exist || true
+for private_net in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do
+    ipt_del filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -d "$private_net" -j ACCEPT || true
+done
+ipt_del filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -j REJECT --reject-with icmp-admin-prohibited || true
 ipt_del filter FORWARD -i "$LAN_IF" -o "$LAN_IF" -j ACCEPT || true
 for tunnel_if in "$AMNEZIA_IF" "$XRAY_IF"; do
     ipt_del filter FORWARD -i "$tunnel_if" -o "$LAN_IF" -m state --state RELATED,ESTABLISHED -j ACCEPT || true
@@ -86,6 +95,14 @@ echo "Removed ip rule for fwmark $FWMARK"
 if ipset list "$IPSET_NAME" &>/dev/null; then
     ipset destroy "$IPSET_NAME"
     echo "Destroyed ipset $IPSET_NAME"
+fi
+if ipset list "$HOST_BLOCK_IPSET" &>/dev/null; then
+    ipset destroy "$HOST_BLOCK_IPSET"
+    echo "Destroyed ipset $HOST_BLOCK_IPSET"
+fi
+if ipset list "$HOST_ACTIVE_IPSET" &>/dev/null; then
+    ipset destroy "$HOST_ACTIVE_IPSET"
+    echo "Destroyed ipset $HOST_ACTIVE_IPSET"
 fi
 
 echo "=== Teardown complete ==="

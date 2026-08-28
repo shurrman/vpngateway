@@ -20,6 +20,7 @@ VPN Gateway 是一个自托管的 Linux 局域网 VPN 网关。它通过 `dnsmas
 - 独立的延迟及下载测试，不会激活被测试配置，也不会切换当前隧道。
 - 可选 OpenVPN 侧隧道，用于服务器推送的私有网段。
 - FastAPI HTTPS API、浏览器管理界面和可选 Flutter 客户端。
+- 运行时 LAN 主机表仅显示过去 15 分钟内实际经过网关转发的客户端，并提供 OS/设备指纹及独立的 Allowed/Local only 开关；仅使用 DNS 的客户端不会进入列表。
 - 使用 systemd 管理路由、健康检查、IP 列表更新和统计任务。
 
 ## 架构

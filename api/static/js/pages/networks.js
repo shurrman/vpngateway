@@ -1,4 +1,4 @@
-/* Networks (IP subnets) management page */
+/* Networks (IP subnets) management page. AppleDouble ._* files are ignored server-side. */
 
 const NetworksPage = {
   async render() {

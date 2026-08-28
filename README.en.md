@@ -18,6 +18,7 @@ An optional OpenVPN side tunnel can carry routes to private remote networks with
 - Independent ping and download tests that do not switch the active tunnel.
 - Optional OpenVPN side tunnel for server-pushed private routes.
 - FastAPI HTTPS API and a browser administration console.
+- Runtime LAN host table limited to clients with forwarded traffic in the last 15 minutes, with OS/device fingerprint and an individual Allowed/Local-only switch; DNS-only clients are excluded and bounded nmap scans run asynchronously.
 - Optional Flutter administration client.
 - systemd services and timers for routing, health checks, IP-list updates, and statistics.
 - Optional public XRay VLESS+XHTTP inbound behind nginx.

@@ -254,6 +254,8 @@ def list_network_files() -> list[NetworkFile]:
     """List all *-networks.lst files."""
     files = []
     for path in sorted(CONFIG_DIR.glob("*-networks.lst")):
+        if path.name.startswith("._"):
+            continue
         name = path.stem.replace("-networks", "")
         entries, description = _parse_network_file(path)
         files.append(NetworkFile(
@@ -267,6 +269,8 @@ def list_network_files() -> list[NetworkFile]:
 
 
 def get_network_file(name: str) -> NetworkFile | None:
+    if name.startswith("._"):
+        return None
     path = CONFIG_DIR / f"{name}-networks.lst"
     if not path.exists():
         return None
@@ -281,7 +285,7 @@ def get_network_file(name: str) -> NetworkFile | None:
 
 
 def _parse_network_file(path: Path) -> tuple[list[str], str]:
-    content = path.read_text()
+    content = path.read_text(encoding="utf-8", errors="replace")
     entries = []
     description = ""
     for line in content.split("\n"):
@@ -303,7 +307,7 @@ def add_cidrs_to_network(name: str, cidrs: list[str]) -> str:
     if not path.exists():
         return f"Network file {name}-networks.lst not found"
 
-    content = path.read_text()
+    content = path.read_text(encoding="utf-8", errors="replace")
     existing = {line.strip() for line in content.split("\n") if line.strip() and not line.strip().startswith("#")}
     new_cidrs = [c for c in cidrs if c not in existing]
     if not new_cidrs:
@@ -319,7 +323,7 @@ def delete_cidrs_from_network(name: str, cidrs: list[str]) -> str:
         return f"Network file {name}-networks.lst not found"
 
     to_remove = set(cidrs)
-    content = path.read_text()
+    content = path.read_text(encoding="utf-8", errors="replace")
     lines = content.split("\n")
     new_lines = [line for line in lines if line.strip() not in to_remove]
     _atomic_write(path, "\n".join(new_lines))

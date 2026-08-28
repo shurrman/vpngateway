@@ -5,6 +5,7 @@ const App = {
     '/': DashboardPage,
     '/domains': DomainsPage,
     '/networks': NetworksPage,
+    '/hosts': HostsPage,
     '/routing': RoutingPage,
     '/services': ServicesPage,
     '/dns': DnsPage,

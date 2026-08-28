@@ -16,20 +16,20 @@ install_os_packages() {
 
     if command -v apt-get >/dev/null 2>&1; then
         packages=(
-            ca-certificates curl dnsmasq iproute2 ipset iptables openssl
+            ca-certificates curl dnsmasq iproute2 ipset iptables nmap openssl
             python3-pip python3-venv unzip
         )
         apt-get update -qq
         DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${packages[@]}" > /dev/null
     elif command -v dnf >/dev/null 2>&1; then
         packages=(
-            ca-certificates curl dnsmasq iproute ipset iptables openssl
+            ca-certificates curl dnsmasq iproute ipset iptables nmap openssl
             python3 python3-pip systemd unzip
         )
         dnf install -y -q "${packages[@]}"
     elif command -v yum >/dev/null 2>&1; then
         packages=(
-            ca-certificates curl dnsmasq iproute ipset iptables openssl
+            ca-certificates curl dnsmasq iproute ipset iptables nmap openssl
             python3 python3-pip systemd unzip
         )
         yum install -y -q "${packages[@]}"
@@ -99,6 +99,7 @@ for config_file in \
 done
 install -m 0600 "$CONF_FILE" "$INSTALL_DIR/config/vpngateway.conf"
 find "$SCRIPT_DIR/config" -maxdepth 1 -type f -name '*-networks.lst' \
+    ! -name '._*' \
     -exec cp {} "$INSTALL_DIR/config/" \;
 mkdir -p "$INSTALL_DIR/config/domains" "$INSTALL_DIR/config/xray"
 for domain_file in \

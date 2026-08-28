@@ -134,8 +134,15 @@ ALLOWED_SERVICES = {
 # Network (from vpngateway.conf with defaults)
 IPSET_NAME = _conf.get("IPSET_NAME", "vpn_domains")
 VPN_INTERFACE = AMNEZIA_INTERFACE
+GATEWAY_IP = _conf.get("GATEWAY_IP", "192.168.50.2")
+LAN_SUBNET = _conf.get("LAN_SUBNET", "192.168.50.0/24")
 LAN_INTERFACE = _conf.get("LAN_INTERFACE", "ens160")
 LAN_GATEWAY = _conf.get("LAN_GATEWAY", "192.168.50.1")
+HOST_BLOCK_IPSET = _conf.get("HOST_BLOCK_IPSET", "vpngw_blocked_hosts")
+HOST_ACTIVE_IPSET = _conf.get("HOST_ACTIVE_IPSET", "vpngw_active_hosts")
+HOST_ACTIVE_TIMEOUT_SECONDS = max(60, int(_conf.get("HOST_ACTIVE_TIMEOUT_SECONDS", "900")))
+HOST_SCAN_INTERVAL_SECONDS = max(60, int(_conf.get("HOST_SCAN_INTERVAL_SECONDS", "300")))
+HOST_SCAN_TIMEOUT_SECONDS = max(5, int(_conf.get("HOST_SCAN_TIMEOUT_SECONDS", "20")))
 
 # Allowed client subnets (LAN-only access)
 _subnets_str = _conf.get("API_ALLOWED_SUBNETS", "192.168.50.0/24,127.0.0.0/8")
@@ -145,6 +152,6 @@ ALLOWED_SUBNETS = [s.strip() for s in _subnets_str.split(",") if s.strip()]
 # IMPORTANT: bump the patch component (X.Y.Z → X.Y.Z+1) and update
 # API_VERSION_DATE on EVERY change to the project. See CLAUDE.md
 # (раздел "Правила для разработки") for the rule and the format.
-API_VERSION = "4.2.25"
+API_VERSION = "4.3.0"
 API_VERSION_DATE = "2026-08-29"
 API_PORT = 443

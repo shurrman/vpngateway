@@ -14,8 +14,12 @@ AMNEZIA_IF="${VPN_INTERFACE:-amn0}"
 XRAY_IF="${XRAY_TUN_INTERFACE:-xray0}"
 XRAY_ADDR="${XRAY_TUN_ADDRESS:-198.18.0.1/30}"
 LAN_IF="${LAN_INTERFACE:-ens160}"
+LAN_NET="${LAN_SUBNET:-192.168.50.0/24}"
 LAN_GW="${LAN_GATEWAY:-192.168.50.1}"
 IPSET_NAME="${IPSET_NAME:-vpn_domains}"
+HOST_BLOCK_IPSET="${HOST_BLOCK_IPSET:-vpngw_blocked_hosts}"
+HOST_ACTIVE_IPSET="${HOST_ACTIVE_IPSET:-vpngw_active_hosts}"
+HOST_ACTIVE_TIMEOUT_SECONDS="${HOST_ACTIVE_TIMEOUT_SECONDS:-900}"
 FWMARK="${FWMARK:-0x1}"
 XRAY_BYPASS_MARK="${XRAY_BYPASS_MARK:-0x2}"
 TABLE="${ROUTING_TABLE:-100}"
@@ -89,6 +93,35 @@ ipt_del() {
     fi
     return 1
 }
+
+ipt_insert() {
+    local table="$1" chain="$2"
+    shift 2
+    if ! iptables -t "$table" -C "$chain" "$@" 2>/dev/null; then
+        iptables -t "$table" -I "$chain" 1 "$@"
+        return 0
+    fi
+    return 1
+}
+
+# Runtime-only per-host internet access. The set is intentionally not flushed
+# here: ordinary route refreshes preserve the current UI choices. API startup,
+# routing teardown, or a host reboot restores the fail-open empty default.
+ipset create "$HOST_BLOCK_IPSET" hash:ip family inet maxelem 1024 -exist
+ipset create "$HOST_ACTIVE_IPSET" hash:ip family inet timeout "$HOST_ACTIVE_TIMEOUT_SECONDS" maxelem 1024 -exist
+
+# Reinsert in reverse order because every rule is inserted at position 1.
+ipt_del filter FORWARD -i "$LAN_IF" -j SET --add-set "$HOST_ACTIVE_IPSET" src --exist || true
+ipt_del filter FORWARD -i "$LAN_IF" -s "$LAN_NET" -j SET --add-set "$HOST_ACTIVE_IPSET" src --exist || true
+ipt_del filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -j REJECT --reject-with icmp-admin-prohibited || true
+for private_net in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do
+    ipt_del filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -d "$private_net" -j ACCEPT || true
+done
+ipt_insert filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -j REJECT --reject-with icmp-admin-prohibited || true
+ipt_insert filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -d 192.168.0.0/16 -j ACCEPT || true
+ipt_insert filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -d 172.16.0.0/12 -j ACCEPT || true
+ipt_insert filter FORWARD -i "$LAN_IF" -m set --match-set "$HOST_BLOCK_IPSET" src -d 10.0.0.0/8 -j ACCEPT || true
+ipt_insert filter FORWARD -i "$LAN_IF" -s "$LAN_NET" -j SET --add-set "$HOST_ACTIVE_IPSET" src --exist || true
 
 case "$MODE" in
 
@@ -174,6 +207,7 @@ case "$MODE" in
     NETWORKS_DIR="/opt/vpngateway/config"
     for lst in "$NETWORKS_DIR"/*-networks.lst; do
         [[ -f "$lst" ]] || continue
+        [[ "$(basename "$lst")" == ._* ]] && continue
         count=0
         while IFS= read -r cidr; do
             cidr="${cidr%%#*}"

@@ -1,6 +1,9 @@
 """VPN Gateway Admin API."""
 
+import asyncio
+import contextlib
 import logging
+import random
 import sys
 from pathlib import Path
 
@@ -13,8 +16,9 @@ from fastapi.staticfiles import StaticFiles
 
 from config import API_VERSION, API_VERSION_DATE
 from middleware.client_filter import ClientFilterMiddleware
-from routers import domains, networks, routing, dns, system, notifications, vpn, openvpn
+from routers import domains, hosts, networks, routing, dns, system, notifications, vpn, openvpn
 from routers import services_rt, xray, xray_client
+from services import hosts as host_service
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,6 +41,7 @@ app.include_router(system.router, prefix="/api/v1")
 app.include_router(services_rt.router, prefix="/api/v1")
 app.include_router(domains.router, prefix="/api/v1")
 app.include_router(networks.router, prefix="/api/v1")
+app.include_router(hosts.router, prefix="/api/v1")
 app.include_router(routing.router, prefix="/api/v1")
 app.include_router(dns.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
@@ -44,6 +49,46 @@ app.include_router(vpn.router, prefix="/api/v1")
 app.include_router(openvpn.router, prefix="/api/v1")
 app.include_router(xray.router, prefix="/api/v1")
 app.include_router(xray_client.router, prefix="/api/v1")
+
+_host_scan_task = None
+
+
+async def host_fingerprint_worker():
+    """Probe current LAN hosts asynchronously, at most once per five minutes."""
+    await asyncio.sleep(5)
+    while True:
+        cycle_started = asyncio.get_running_loop().time()
+        try:
+            ips = await asyncio.to_thread(host_service.shuffled_due_hosts)
+            for ip in ips:
+                await asyncio.to_thread(host_service.scan_host_fingerprint, ip)
+                await asyncio.sleep(random.uniform(0.5, 2.0))
+        except host_service.HostAccessError as exc:
+            logging.getLogger(__name__).warning("host fingerprint cycle failed: %s", exc)
+
+        elapsed = asyncio.get_running_loop().time() - cycle_started
+        await asyncio.sleep(max(5, host_service.HOST_SCAN_INTERVAL_SECONDS - elapsed))
+
+
+@app.on_event("startup")
+async def reset_host_access_control():
+    """Host restrictions are deliberately runtime-only and fail open."""
+    try:
+        host_service.reset_access_control()
+    except host_service.HostAccessError as exc:
+        logging.getLogger(__name__).warning("host access reset failed: %s", exc)
+    global _host_scan_task
+    _host_scan_task = asyncio.create_task(host_fingerprint_worker())
+
+
+@app.on_event("shutdown")
+async def stop_host_fingerprint_worker():
+    global _host_scan_task
+    if _host_scan_task:
+        _host_scan_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await _host_scan_task
+    _host_scan_task = None
 
 
 @app.get("/api/v1/health")

@@ -45,6 +45,14 @@ API_ALLOWED_SUBNETS="192.168.50.0/24,127.0.0.0/8"
 # --- Advanced (usually no need to change) ---
 IPSET_NAME=vpn_domains
 IPSET_MAXELEM=131072
+# Runtime-only LAN clients denied internet forwarding by the Hosts page.
+HOST_BLOCK_IPSET=vpngw_blocked_hosts
+# LAN source IPs that sent forwarded traffic recently; entries expire automatically.
+HOST_ACTIVE_IPSET=vpngw_active_hosts
+HOST_ACTIVE_TIMEOUT_SECONDS=900
+# Background nmap OS/device fingerprint cadence and per-host hard timeout.
+HOST_SCAN_INTERVAL_SECONDS=300
+HOST_SCAN_TIMEOUT_SECONDS=20
 FWMARK=0x1
 # Socket mark used by XRay client outbound connections to bypass xray0 loop.
 XRAY_BYPASS_MARK=0x2

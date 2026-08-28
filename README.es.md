@@ -20,6 +20,7 @@ Un túnel OpenVPN opcional puede proporcionar acceso independiente a redes priva
 - Pruebas independientes de latencia y descarga que no activan la configuración examinada.
 - Túnel lateral OpenVPN para rutas privadas anunciadas por el servidor.
 - API FastAPI, consola web HTTPS y cliente Flutter opcional.
+- Tabla runtime limitada a hosts LAN con tráfico reenviado durante los últimos 15 minutos, fingerprint de OS/dispositivo y selector individual Allowed/Local only; los clientes que solo usan DNS quedan excluidos.
 - Servicios y temporizadores systemd para rutas, salud, listas IP y estadísticas.
 
 ## Arquitectura
