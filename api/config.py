@@ -145,6 +145,6 @@ ALLOWED_SUBNETS = [s.strip() for s in _subnets_str.split(",") if s.strip()]
 # IMPORTANT: bump the patch component (X.Y.Z → X.Y.Z+1) and update
 # API_VERSION_DATE on EVERY change to the project. See CLAUDE.md
 # (раздел "Правила для разработки") for the rule and the format.
-API_VERSION = "4.2.23"
+API_VERSION = "4.2.24"
 API_VERSION_DATE = "2026-08-29"
 API_PORT = 443
